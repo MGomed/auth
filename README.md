@@ -1,2 +1,1 @@
-# auth
-Auth microservice
+# Auth Service
