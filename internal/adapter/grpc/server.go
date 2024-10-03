@@ -9,8 +9,8 @@ import (
 
 	gofakeit "github.com/brianvoe/gofakeit/v7"
 	empty "github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	grpc "google.golang.org/grpc"
+	reflection "google.golang.org/grpc/reflection"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 

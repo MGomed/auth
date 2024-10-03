@@ -1,5 +1,6 @@
 LOCAL_BIN:=$(CURDIR)/bin
-API:=user_api_v1
+API_PROTO:=user_api_v1
+API:=user_api
 
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
@@ -18,10 +19,10 @@ generate:
 	make generate-user-api
 
 generate-user-api:
-	mkdir -p pkg/user_api
-	protoc --proto_path api/$(API) \
-	--go_out=pkg/user_api --go_opt=paths=source_relative \
+	mkdir -p pkg/$(API)
+	protoc --proto_path api/$(API_PROTO) \
+	--go_out=pkg/$(API) --go_opt=paths=source_relative \
 	--plugin=protoc-gen-go=bin/protoc-gen-go \
-	--go-grpc_out=pkg/user_api --go-grpc_opt=paths=source_relative \
+	--go-grpc_out=pkg/$(API) --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
-	api/$(API)/*
+	api/$(API_PROTO)/*
