@@ -8,7 +8,7 @@ import (
 	config "github.com/MGomed/auth/config"
 	grpc_adapter "github.com/MGomed/auth/internal/adapter/grpc"
 	user_api "github.com/MGomed/auth/internal/usecase/user_api"
-	logger "github.com/MGomed/auth/pkg/logger.go"
+	logger "github.com/MGomed/auth/pkg/logger"
 )
 
 func main() {
