@@ -2,15 +2,19 @@ package userapi_usecase
 
 import (
 	"context"
+	"log"
 
 	domain "github.com/MGomed/auth/internal/domain"
 )
 
 type usecase struct {
+	logger *log.Logger
 }
 
-func NewUserAPIUsecase() *usecase {
-	return &usecase{}
+func NewUserAPIUsecase(logger *log.Logger) *usecase {
+	return &usecase{
+		logger: logger,
+	}
 }
 
 func (uc *usecase) Create(ctx context.Context, req *domain.CreateRequest) (*domain.CreateResponse, error) {
