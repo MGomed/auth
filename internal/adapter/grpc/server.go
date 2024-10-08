@@ -31,6 +31,7 @@ type server struct {
 	usecase UserAPIUsecase
 }
 
+// NewGrpcServer is server constructor
 func NewGrpcServer(logger *log.Logger, usecase UserAPIUsecase) *server {
 	return &server{
 		logger:  logger,
@@ -38,6 +39,8 @@ func NewGrpcServer(logger *log.Logger, usecase UserAPIUsecase) *server {
 	}
 }
 
+// Serve gets net.Listener and bind it to grpc server,
+// also blocking execution by calling Serve()
 func (s *server) Serve(listener net.Listener) error {
 	server := grpc.NewServer()
 	reflection.Register(server)
@@ -46,8 +49,9 @@ func (s *server) Serve(listener net.Listener) error {
 	return server.Serve(listener)
 }
 
+// Create creates new user
 func (s *server) Create(ctx context.Context, req *api.CreateRequest) (*api.CreateResponse, error) {
-	opt := protojson.MarshalOptions{Indent: "    "}
+	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
 	msg, _ := opt.Marshal(req)
 	s.logger.Printf("<<<< Received create request:\n%s", msg)
 
@@ -64,8 +68,9 @@ func (s *server) Create(ctx context.Context, req *api.CreateRequest) (*api.Creat
 	return resp, nil
 }
 
+// Get gets user by id
 func (s *server) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse, error) {
-	opt := protojson.MarshalOptions{Indent: "    "}
+	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
 	msg, _ := opt.Marshal(req)
 	s.logger.Printf("<<<< Received get request:\n%s", msg)
 
@@ -76,7 +81,7 @@ func (s *server) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse
 		Id:        gofakeit.Int64(),
 		Name:      gofakeit.Name(),
 		Email:     gofakeit.Email(),
-		Role:      api.Role_user,
+		Role:      api.Role_USER,
 		CreatedAt: timestamppb.Now(),
 		UpdatedAt: timestamppb.Now(),
 	}
@@ -87,8 +92,9 @@ func (s *server) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse
 	return resp, nil
 }
 
+// Update modifies user information
 func (s *server) Update(ctx context.Context, req *api.UpdateRequest) (*empty.Empty, error) {
-	opt := protojson.MarshalOptions{Indent: "    "}
+	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
 	msg, _ := opt.Marshal(req)
 	s.logger.Printf("<<<< Received update request:\n%s", msg)
 
@@ -98,8 +104,9 @@ func (s *server) Update(ctx context.Context, req *api.UpdateRequest) (*empty.Emp
 	return &empty.Empty{}, nil
 }
 
+// Delete removes user by id
 func (s *server) Delete(ctx context.Context, req *api.DeleteRequest) (*empty.Empty, error) {
-	opt := protojson.MarshalOptions{Indent: "    "}
+	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
 	msg, _ := opt.Marshal(req)
 	s.logger.Printf("<<<< Received delete request:\n%s", msg)
 

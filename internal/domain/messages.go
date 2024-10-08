@@ -87,10 +87,9 @@ type UpdateRequest struct {
 // UpdateReqFromAPIToDomain converts api.UpdateRequest to domain.UpdateRequest
 func UpdateReqFromAPIToDomain(req *api.UpdateRequest) *UpdateRequest {
 	return &UpdateRequest{
-		ID:    req.Id,
-		Name:  req.Name.GetValue(),
-		Email: req.Email.GetValue(),
-		Role:  Role(req.Role),
+		ID:   req.Id,
+		Name: req.Name.GetValue(),
+		Role: Role(req.Role),
 	}
 }
 

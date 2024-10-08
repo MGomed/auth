@@ -11,31 +11,36 @@ type usecase struct {
 	logger *log.Logger
 }
 
+// NewUserAPIUsecase is a usecase constructor
 func NewUserAPIUsecase(logger *log.Logger) *usecase {
 	return &usecase{
 		logger: logger,
 	}
 }
 
-func (uc *usecase) Create(ctx context.Context, req *domain.CreateRequest) (*domain.CreateResponse, error) {
+// Create creates new user
+func (uc *usecase) Create(_ context.Context, _ *domain.CreateRequest) (*domain.CreateResponse, error) {
 	// TODO some business logic
 
 	return nil, nil
 }
 
-func (uc *usecase) Get(ctx context.Context, req *domain.GetRequest) (*domain.GetResponse, error) {
+// Get gets user by id
+func (uc *usecase) Get(_ context.Context, _ *domain.GetRequest) (*domain.GetResponse, error) {
 	// TODO some business logic
 
 	return nil, nil
 }
 
-func (uc *usecase) Update(ctx context.Context, req *domain.UpdateRequest) error {
+// Update modifies user information
+func (uc *usecase) Update(_ context.Context, _ *domain.UpdateRequest) error {
 	// TODO some business logic
 
 	return nil
 }
 
-func (uc *usecase) Delete(ctx context.Context, req *domain.DeleteRequest) error {
+// Delete removes user by id
+func (uc *usecase) Delete(_ context.Context, _ *domain.DeleteRequest) error {
 	// TODO some business logic
 
 	return nil

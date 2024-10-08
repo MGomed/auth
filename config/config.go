@@ -11,16 +11,19 @@ const configPath = "config/auth.conf"
 
 var errReadConf = errors.New("couldn't read config")
 
-type ConfigGRPC struct {
+// GRPC defines struct with grpc host and port
+type GRPC struct {
 	Host string `json:"host"`
 	Port uint32 `json:"port"`
 }
 
+// Config defines auth service configuration
 type Config struct {
-	GRPC      ConfigGRPC `json:"grpc"`
-	OutLogDir string     `json:"outLogDir"`
+	GRPC      GRPC   `json:"grpc"`
+	OutLogDir string `json:"outLogDir"`
 }
 
+// GetConfig reads config from configPath and unmarshal it to Config
 func GetConfig() (*Config, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {

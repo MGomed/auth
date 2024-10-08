@@ -16,9 +16,9 @@ service UserAPI {
 }
 
 enum Role {
-    unknown = 0;
-    user    = 1;
-    admin   = 2;
+    UNKNOWN = 0;
+    USER    = 1;
+    ADMIN   = 2;
 }
 
 message CreateRequest {
@@ -49,8 +49,7 @@ message GetResponse {
 message UpdateRequest {
     int64                       id    = 1;
     google.protobuf.StringValue name  = 2;
-    google.protobuf.StringValue email = 3;
-    Role                        role  = 4;
+    Role                        role  = 3;
 }
 
 message DeleteRequest {
