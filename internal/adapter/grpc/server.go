@@ -24,29 +24,40 @@ type UserAPIUsecase interface {
 	Delete(ctx context.Context, req *domain.DeleteRequest) error
 }
 
+type GRPCConfig interface {
+	Address() string
+}
+
 type server struct {
 	api.UnimplementedUserAPIServer
 
 	logger  *log.Logger
+	config  GRPCConfig
 	usecase UserAPIUsecase
 }
 
 // NewGrpcServer is server constructor
-func NewGrpcServer(logger *log.Logger, usecase UserAPIUsecase) *server {
+func NewGrpcServer(logger *log.Logger, config GRPCConfig, usecase UserAPIUsecase) *server {
 	return &server{
 		logger:  logger,
+		config:  config,
 		usecase: usecase,
 	}
 }
 
 // Serve gets net.Listener and bind it to grpc server,
 // also blocking execution by calling Serve()
-func (s *server) Serve(listener net.Listener) error {
+func (s *server) Serve() error {
+	lis, err := net.Listen("tcp", s.config.Address())
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
 	server := grpc.NewServer()
 	reflection.Register(server)
 	api.RegisterUserAPIServer(server, s)
 
-	return server.Serve(listener)
+	return server.Serve(lis)
 }
 
 // Create creates new user

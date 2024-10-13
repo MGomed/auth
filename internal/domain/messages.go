@@ -7,26 +7,44 @@ import (
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Role domain version of api.Role
-type Role int32
+// RoleToName maps role with it's name
+var RoleToName = map[int32]string{
+	0: "UNKNOWN",
+	1: "USER",
+	2: "ADMIN",
+}
+
+// NameToRole maps name with it's role
+var NameToRole = map[string]int32{
+	"UNKNOWN": 0,
+	"USER":    1,
+	"ADMIN":   2,
+}
+
+type UserInfo struct {
+	ID        int64
+	Name      string
+	Email     string
+	Password  string
+	Role      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
 
 // CreateRequest domain version of api.CreateRequest
 type CreateRequest struct {
-	Name            string
-	Email           string
-	Password        string
-	PasswordConfirm string
-	Role            Role
+	Info *UserInfo
 }
 
 // CreateReqFromAPIToDomain converts api.CreateRequest to domain.CreateRequest
 func CreateReqFromAPIToDomain(req *api.CreateRequest) *CreateRequest {
 	return &CreateRequest{
-		Name:            req.Name,
-		Email:           req.Email,
-		Password:        req.Password,
-		PasswordConfirm: req.PasswordConfirm,
-		Role:            Role(req.Role),
+		Info: &UserInfo{
+			Name:     req.Name,
+			Email:    req.Email,
+			Password: req.Password,
+			Role:     RoleToName[int32(req.Role)],
+		},
 	}
 }
 
@@ -56,40 +74,34 @@ func GetReqFromAPIToDomain(req *api.GetRequest) *GetRequest {
 
 // GetResponse domain version of api.GetResponse
 type GetResponse struct {
-	ID        int64
-	Name      string
-	Email     string
-	Role      Role
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Info *UserInfo
 }
 
 // GetRespToAPIFromDomain converts domain.GetResponse to api.GetResponse
 func GetRespToAPIFromDomain(resp *GetResponse) *api.GetResponse {
 	return &api.GetResponse{
-		Id:        resp.ID,
-		Name:      resp.Name,
-		Email:     resp.Email,
-		Role:      api.Role(resp.Role),
-		CreatedAt: timestamppb.New(resp.CreatedAt),
-		UpdatedAt: timestamppb.New(resp.UpdatedAt),
+		Id:        resp.Info.ID,
+		Name:      resp.Info.Name,
+		Email:     resp.Info.Email,
+		Role:      api.Role(NameToRole[resp.Info.Role]),
+		CreatedAt: timestamppb.New(resp.Info.CreatedAt),
+		UpdatedAt: timestamppb.New(resp.Info.UpdatedAt),
 	}
 }
 
 // UpdateRequest domain version of api.UpdateRequest
 type UpdateRequest struct {
-	ID    int64
-	Name  string
-	Email string
-	Role  Role
+	Info *UserInfo
 }
 
 // UpdateReqFromAPIToDomain converts api.UpdateRequest to domain.UpdateRequest
 func UpdateReqFromAPIToDomain(req *api.UpdateRequest) *UpdateRequest {
 	return &UpdateRequest{
-		ID:   req.Id,
-		Name: req.Name.GetValue(),
-		Role: Role(req.Role),
+		Info: &UserInfo{
+			ID:   req.Id,
+			Name: req.Name.GetValue(),
+			Role: RoleToName[int32(req.Role)],
+		},
 	}
 }
 
