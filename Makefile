@@ -34,3 +34,9 @@ db-up:
 
 db-down:
 	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator
+
+up:
+	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d
+
+down:
+	docker compose -f ${BUILD_DIR}/docker-compose.yml down

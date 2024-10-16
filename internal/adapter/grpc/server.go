@@ -8,12 +8,9 @@ import (
 	domain "github.com/MGomed/auth/internal/domain"
 	api "github.com/MGomed/auth/pkg/user_api"
 
-	gofakeit "github.com/brianvoe/gofakeit/v7"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	reflection "google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/encoding/protojson"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // UserAPIUsecase interface of user_api usecase
@@ -62,67 +59,40 @@ func (s *server) Serve() error {
 
 // Create creates new user
 func (s *server) Create(ctx context.Context, req *api.CreateRequest) (*api.CreateResponse, error) {
-	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
-	msg, _ := opt.Marshal(req)
-	s.logger.Printf("<<<< Received create request:\n%s", msg)
-
-	//TODO correct the call ufter implementation
-	_, _ = s.usecase.Create(ctx, domain.CreateReqFromAPIToDomain(req))
-
-	resp := &api.CreateResponse{
-		Id: gofakeit.Int64(),
+	resp, err := s.usecase.Create(ctx, domain.CreateReqFromAPIToDomain(req))
+	if err != nil {
+		return nil, err
 	}
 
-	msg, _ = opt.Marshal(resp)
-	s.logger.Printf(">>>> Sent create response:\n%s", msg)
-
-	return resp, nil
+	return domain.CreateRespToAPIFromDomain(resp), nil
 }
 
 // Get gets user by id
 func (s *server) Get(ctx context.Context, req *api.GetRequest) (*api.GetResponse, error) {
-	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
-	msg, _ := opt.Marshal(req)
-	s.logger.Printf("<<<< Received get request:\n%s", msg)
-
-	// TODO correct the call ufter implementation
-	_, _ = s.usecase.Get(ctx, domain.GetReqFromAPIToDomain(req))
-
-	resp := &api.GetResponse{
-		Id:        gofakeit.Int64(),
-		Name:      gofakeit.Name(),
-		Email:     gofakeit.Email(),
-		Role:      api.Role_USER,
-		CreatedAt: timestamppb.Now(),
-		UpdatedAt: timestamppb.Now(),
+	resp, err := s.usecase.Get(ctx, domain.GetReqFromAPIToDomain(req))
+	if err != nil {
+		return nil, err
 	}
 
-	msg, _ = opt.Marshal(resp)
-	s.logger.Printf(">>>> Sent get response:\n%s", msg)
-
-	return resp, nil
+	return domain.GetRespToAPIFromDomain(resp), nil
 }
 
 // Update modifies user information
 func (s *server) Update(ctx context.Context, req *api.UpdateRequest) (*empty.Empty, error) {
-	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
-	msg, _ := opt.Marshal(req)
-	s.logger.Printf("<<<< Received update request:\n%s", msg)
-
-	// TODO correct the call ufter implementation
-	_ = s.usecase.Update(ctx, domain.UpdateReqFromAPIToDomain(req))
+	err := s.usecase.Update(ctx, domain.UpdateReqFromAPIToDomain(req))
+	if err != nil {
+		return nil, err
+	}
 
 	return &empty.Empty{}, nil
 }
 
 // Delete removes user by id
 func (s *server) Delete(ctx context.Context, req *api.DeleteRequest) (*empty.Empty, error) {
-	opt := protojson.MarshalOptions{Indent: "    "} // for beautiful logs
-	msg, _ := opt.Marshal(req)
-	s.logger.Printf("<<<< Received delete request:\n%s", msg)
-
-	// TODO correct the call ufter implementation
-	_ = s.usecase.Delete(ctx, domain.DeleteReqFromAPIToDomain(req))
+	err := s.usecase.Delete(ctx, domain.DeleteReqFromAPIToDomain(req))
+	if err != nil {
+		return nil, err
+	}
 
 	return &empty.Empty{}, nil
 }

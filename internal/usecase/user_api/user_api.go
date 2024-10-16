@@ -38,26 +38,51 @@ func (uc *usecase) Create(ctx context.Context, req *domain.CreateRequest) (*doma
 
 	uc.logger.Printf("Successfully added user with id: %v", id)
 
-	return nil, nil
+	return &domain.CreateResponse{
+		ID: int64(id),
+	}, nil
 }
 
 // Get gets user by id
-func (uc *usecase) Get(_ context.Context, _ *domain.GetRequest) (*domain.GetResponse, error) {
-	// TODO some business logic
+func (uc *usecase) Get(ctx context.Context, req *domain.GetRequest) (*domain.GetResponse, error) {
+	info, err := uc.dbAdapter.GetUser(ctx, int(req.ID))
+	if err != nil {
+		uc.logger.Printf("Failed to get user with id - %v from database: %v", req.ID, err)
 
-	return nil, nil
+		return nil, err
+	}
+
+	uc.logger.Printf("Successfully got user: %v", info)
+
+	return &domain.GetResponse{
+		Info: info,
+	}, nil
 }
 
 // Update modifies user information
-func (uc *usecase) Update(_ context.Context, _ *domain.UpdateRequest) error {
-	// TODO some business logic
+func (uc *usecase) Update(ctx context.Context, req *domain.UpdateRequest) error {
+	_, err := uc.dbAdapter.UpdateUser(ctx, req.Info)
+	if err != nil {
+		uc.logger.Printf("Failed to update user - %v from database: %v", req.Info, err)
+
+		return err
+	}
+
+	uc.logger.Printf("Successfully updated user with id: %v", req.Info.ID)
 
 	return nil
 }
 
 // Delete removes user by id
-func (uc *usecase) Delete(_ context.Context, _ *domain.DeleteRequest) error {
-	// TODO some business logic
+func (uc *usecase) Delete(ctx context.Context, req *domain.DeleteRequest) error {
+	_, err := uc.dbAdapter.DeleteUser(ctx, int(req.ID))
+	if err != nil {
+		uc.logger.Printf("Failed to delete user with id - %v from database: %v", req.ID, err)
+
+		return err
+	}
+
+	uc.logger.Printf("Successfully deleted user: %v", req.ID)
 
 	return nil
 }

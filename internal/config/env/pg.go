@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	pgEnvHost     = "PG_HOST"
-	pgEnvPort     = "PG_PORT"
-	pgEnvDBName   = "PG_DATABASE_NAME"
-	pgEnvUser     = "PG_USER"
-	pgEnvPassword = "PG_PASSWORD"
+	pgEnvHost     = "DB_HOST"
+	pgEnvPort     = "DB_PORT"
+	pgEnvDBName   = "POSTGRES_DB"
+	pgEnvUser     = "POSTGRES_USER"
+	pgEnvPassword = "POSTGRES_PASSWORD"
 )
 
 type pgConfig struct {

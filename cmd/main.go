@@ -7,7 +7,7 @@ import (
 
 	grpc_port "github.com/MGomed/auth/internal/adapter/grpc"
 	postgres "github.com/MGomed/auth/internal/adapter/postgres"
-	"github.com/MGomed/auth/internal/config"
+	config "github.com/MGomed/auth/internal/config"
 	env_config "github.com/MGomed/auth/internal/config/env"
 	user_api "github.com/MGomed/auth/internal/usecase/user_api"
 	logger "github.com/MGomed/auth/pkg/logger"
@@ -17,6 +17,7 @@ var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "build/.env", "path to config file")
+	flag.Parse()
 }
 
 func main() {
@@ -29,24 +30,24 @@ func main() {
 
 	cfg := initConfig()
 
-	log, err := logger.InitLogger(cfg)
+	logger, err := logger.InitLogger(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pgAdapter, err := postgres.NewAdapter(ctx, log, cfg)
+	pgAdapter, err := postgres.NewAdapter(ctx, cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userAPIUsecase := user_api.NewUserAPIUsecase(log, pgAdapter)
+	userAPIUsecase := user_api.NewUserAPIUsecase(logger, pgAdapter)
 
-	server := grpc_port.NewGrpcServer(log, cfg, userAPIUsecase)
+	server := grpc_port.NewGrpcServer(logger, cfg, userAPIUsecase)
 
-	log.Println("Starting GRPC server!")
+	logger.Println("Starting GRPC server!")
 
 	if err := server.Serve(); err != nil {
-		log.Fatalf("failed to start grpc server: %v", err)
+		logger.Fatalf("failed to start grpc server: %v", err)
 	}
 }
 

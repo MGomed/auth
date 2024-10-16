@@ -3,11 +3,12 @@ package postgres
 import (
 	"context"
 	"errors"
-	"log"
+	"fmt"
 	"time"
 
-	"github.com/MGomed/auth/internal/domain"
+	domain "github.com/MGomed/auth/internal/domain"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgtype"
 	pgxpool "github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -26,11 +27,10 @@ type PostgresConfig interface {
 
 type adapter struct {
 	ctx  context.Context
-	log  *log.Logger
 	pool *pgxpool.Pool
 }
 
-func NewAdapter(ctx context.Context, log *log.Logger, config PostgresConfig) (*adapter, error) {
+func NewAdapter(ctx context.Context, config PostgresConfig) (*adapter, error) {
 	pool, err := pgxpool.Connect(ctx, config.DSN())
 	if err != nil {
 		return nil, err
@@ -38,7 +38,6 @@ func NewAdapter(ctx context.Context, log *log.Logger, config PostgresConfig) (*a
 
 	return &adapter{
 		ctx:  ctx,
-		log:  log,
 		pool: pool,
 	}, nil
 }
@@ -52,17 +51,13 @@ func (a *adapter) CreateUser(ctx context.Context, info *domain.UserInfo) (int, e
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryBuild, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
 	var userID int
-	err = a.pool.QueryRow(a.ctx, query, args...).Scan(userID)
+	err = a.pool.QueryRow(a.ctx, query, args...).Scan(&userID)
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryExecute, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
 
 	return userID, nil
@@ -76,19 +71,18 @@ func (a *adapter) GetUser(ctx context.Context, id int) (*domain.UserInfo, error)
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryBuild, query, err)
-
-		return nil, err
+		return nil, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
 	var info = &domain.UserInfo{}
+	var updatedTime pgtype.Timestamp
 	err = a.pool.QueryRow(ctx, query, args...).
-		Scan(&info.Name, &info.Email, &info.Role, &info.CreatedAt, &info.UpdatedAt)
+		Scan(&info.Name, &info.Email, &info.Role, &info.CreatedAt, &updatedTime)
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryExecute, query, err)
-
-		return nil, err
+		return nil, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
+
+	info.UpdatedAt = updatedTime.Time
 
 	return info, nil
 }
@@ -104,16 +98,12 @@ func (a *adapter) UpdateUser(ctx context.Context, info *domain.UserInfo) (int, e
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryBuild, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
 	res, err := a.pool.Exec(a.ctx, query, args...)
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryExecute, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
 
 	return int(res.RowsAffected()), nil
@@ -126,16 +116,12 @@ func (a *adapter) DeleteUser(ctx context.Context, id int) (int, error) {
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryBuild, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
 	res, err := a.pool.Exec(a.ctx, query, args...)
 	if err != nil {
-		a.log.Printf("%v - %v : %v", errQueryExecute, query, err)
-
-		return 0, err
+		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
 
 	return int(res.RowsAffected()), nil
