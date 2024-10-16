@@ -21,7 +21,8 @@ type UserAPIUsecase interface {
 	Delete(ctx context.Context, req *domain.DeleteRequest) error
 }
 
-type GRPCConfig interface {
+// Config declair grpc config interface
+type Config interface {
 	Address() string
 }
 
@@ -29,12 +30,12 @@ type server struct {
 	api.UnimplementedUserAPIServer
 
 	logger  *log.Logger
-	config  GRPCConfig
+	config  Config
 	usecase UserAPIUsecase
 }
 
 // NewGrpcServer is server constructor
-func NewGrpcServer(logger *log.Logger, config GRPCConfig, usecase UserAPIUsecase) *server {
+func NewGrpcServer(logger *log.Logger, config Config, usecase UserAPIUsecase) *server {
 	return &server{
 		logger:  logger,
 		config:  config,

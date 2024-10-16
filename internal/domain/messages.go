@@ -21,6 +21,7 @@ var NameToRole = map[string]int32{
 	"ADMIN":   2,
 }
 
+// UserInfo declair user information
 type UserInfo struct {
 	ID        int64
 	Name      string

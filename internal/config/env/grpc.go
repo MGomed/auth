@@ -8,7 +8,7 @@ import (
 
 const (
 	grpcHostName = "SERVER_HOST"
-	grpcPortName = "SERVER_PORT"
+	grpcPortName = "SERVE_PORT"
 )
 
 type grpcConfig struct {
@@ -16,6 +16,7 @@ type grpcConfig struct {
 	port string
 }
 
+// NewGRPCConfig is grpcConfig struct constructor
 func NewGRPCConfig() (*grpcConfig, error) {
 	host := os.Getenv(grpcHostName)
 	if len(host) == 0 {
@@ -33,6 +34,7 @@ func NewGRPCConfig() (*grpcConfig, error) {
 	}, nil
 }
 
+// Address returns grpc ip address
 func (c *grpcConfig) Address() string {
 	return net.JoinHostPort(c.host, c.port)
 }

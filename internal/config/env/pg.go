@@ -10,7 +10,7 @@ const (
 	pgEnvPort     = "DB_PORT"
 	pgEnvDBName   = "POSTGRES_DB"
 	pgEnvUser     = "POSTGRES_USER"
-	pgEnvPassword = "POSTGRES_PASSWORD"
+	pgEnvPassword = "POSTGRES_PASSWORD" //nolint: gosec
 )
 
 type pgConfig struct {
@@ -21,6 +21,7 @@ type pgConfig struct {
 	password string
 }
 
+// NewPgConfig is pgConfig struct constructor
 func NewPgConfig() (*pgConfig, error) {
 	host := os.Getenv(pgEnvHost)
 	if len(host) == 0 {
@@ -56,6 +57,7 @@ func NewPgConfig() (*pgConfig, error) {
 	}, nil
 }
 
+// DSN returns postgres connection dsn
 func (c *pgConfig) DSN() string {
 	return fmt.Sprintf("host=%v port=%v dbname=%v user=%v password=%v sslmode=disable",
 		c.host, c.port, c.dbName, c.user, c.password)

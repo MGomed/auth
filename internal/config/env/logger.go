@@ -11,6 +11,7 @@ type loggerConfig struct {
 	logOutDir string
 }
 
+// NewLoggerConfig is loggerConfig struct constructor
 func NewLoggerConfig() (*loggerConfig, error) {
 	dir := os.Getenv(loggerEnvOutDirName)
 	if len(dir) == 0 {
@@ -22,6 +23,7 @@ func NewLoggerConfig() (*loggerConfig, error) {
 	}, nil
 }
 
+// OutDir return logs out director
 func (c *loggerConfig) OutDir() string {
 	return c.logOutDir
 }

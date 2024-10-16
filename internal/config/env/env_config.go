@@ -8,6 +8,7 @@ import (
 
 var errEnvNotFound = errors.New("environment not found")
 
+// Load setup envs from file
 func Load(path string) error {
 	return godotenv.Load(path)
 }

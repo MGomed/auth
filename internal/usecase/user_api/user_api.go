@@ -7,6 +7,7 @@ import (
 	domain "github.com/MGomed/auth/internal/domain"
 )
 
+// DatabaseAdapter declaired interface for database communication
 type DatabaseAdapter interface {
 	CreateUser(ctx context.Context, info *domain.UserInfo) (int, error)
 	GetUser(ctx context.Context, id int) (*domain.UserInfo, error)

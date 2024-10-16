@@ -21,23 +21,23 @@ var (
 	errQueryExecute = errors.New("failed to execute query")
 )
 
-type PostgresConfig interface {
+// Config declair postgres config interface
+type Config interface {
 	DSN() string
 }
 
 type adapter struct {
-	ctx  context.Context
 	pool *pgxpool.Pool
 }
 
-func NewAdapter(ctx context.Context, config PostgresConfig) (*adapter, error) {
+// NewAdapter is adapter struct constructor
+func NewAdapter(ctx context.Context, config Config) (*adapter, error) {
 	pool, err := pgxpool.Connect(ctx, config.DSN())
 	if err != nil {
 		return nil, err
 	}
 
 	return &adapter{
-		ctx:  ctx,
 		pool: pool,
 	}, nil
 }
@@ -55,7 +55,7 @@ func (a *adapter) CreateUser(ctx context.Context, info *domain.UserInfo) (int, e
 	}
 
 	var userID int
-	err = a.pool.QueryRow(a.ctx, query, args...).Scan(&userID)
+	err = a.pool.QueryRow(ctx, query, args...).Scan(&userID)
 	if err != nil {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
@@ -101,7 +101,7 @@ func (a *adapter) UpdateUser(ctx context.Context, info *domain.UserInfo) (int, e
 		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
-	res, err := a.pool.Exec(a.ctx, query, args...)
+	res, err := a.pool.Exec(ctx, query, args...)
 	if err != nil {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
@@ -119,7 +119,7 @@ func (a *adapter) DeleteUser(ctx context.Context, id int) (int, error) {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
-	res, err := a.pool.Exec(a.ctx, query, args...)
+	res, err := a.pool.Exec(ctx, query, args...)
 	if err != nil {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
