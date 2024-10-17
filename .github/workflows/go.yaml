@@ -106,7 +106,7 @@ jobs:
             docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
 
             # Create Docker network for containers
-            docker network create $NETWORK || true
+            docker network create auth-network || true
             
             # Stop and remove old auth-service container
             docker stop $CONTAINER_NAME || true
