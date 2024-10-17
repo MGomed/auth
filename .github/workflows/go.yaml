@@ -82,4 +82,4 @@ jobs:
         run: |
           TAG_NAME=$(echo $GITHUB_SHA | head -c7)
           docker buildx create --use
-          docker buildx build --no-cache --push --tag $REGISTRY/$MIGRATOT_IMAGE_NAME:$TAG_NAME -f build/Dockerfile.migrations build 
+          docker buildx build --no-cache --push --tag $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME -f build/Dockerfile.migrations build 
