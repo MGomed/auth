@@ -120,9 +120,9 @@ jobs:
             docker rm $DB_CONTAINER_NAME || true
 
             # Start db container
-            docker run -d --name $DB_CONTAINER_NAME \          
+            docker run -d --name $DB_CONTAINER_NAME \
             --network $NETWORK \
-            -e POSTGRES_DB=auth \  
+            -e POSTGRES_DB=auth \
             -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
             -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
             -v postgres_data:/var/lib/postgresql/auth_data \
@@ -136,14 +136,14 @@ jobs:
             echo "MIGRATION_DIR=./migrations" >> build/.env
 
             # Start migrator container
-            docker run -d --name $MIGRATOR_CONTAINER_NAME \          
+            docker run -d --name $MIGRATOR_CONTAINER_NAME \
             --network $NETWORK \
             --env-file build/.env \
             -e DB_HOST=$DB_CONTAINER_NAME \
             -t $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME .
 
             # Start auth-service container
-            docker run -d --name $CONTAINER_NAME \          
+            docker run -d --name $CONTAINER_NAME \
             --network $NETWORK \
             -e DB_HOST=$DB_CONTAINER_NAME \
             -p 50051:50051 \
