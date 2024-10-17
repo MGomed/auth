@@ -130,18 +130,22 @@ jobs:
             -p 5432:5432 $DB_IMAGE_NAME
 
             # Create .env file for migrator
-            echo "DB_HOST=$DB_CONTAINER_NAME" >> .env
             echo "DB_PORT=5432" >> .env
             echo "POSTGRES_DB=auth" >> .env
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "MIGRATION_DIR=./migrations" >> .env
 
+            sleep 5
+
             # Start migrator container
             docker run -d --name $MIGRATOR_CONTAINER_NAME \
             --network auth-network \
             --env-file .env \
+            -e DB_HOST=$DB_CONTAINER_NAME \
             -t $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME
+
+            sleep 5
 
             # Start auth-service container
             docker run -d --name $CONTAINER_NAME \
