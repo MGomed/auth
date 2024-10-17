@@ -15,4 +15,4 @@ RUN mkdir -p ./out/log
 COPY --from=builder /github.com/MGomed/auth/bin/app .
 COPY --from=builder /github.com/MGomed/auth/build/.env .
 
-CMD ["./app -config-path .env"]
+CMD ["./app", "-config-path .env"]

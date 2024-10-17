@@ -136,16 +136,12 @@ jobs:
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "MIGRATION_DIR=./migrations" >> .env
 
-            sleep 5
-
             # Start migrator container
             docker run -d --name $MIGRATOR_CONTAINER_NAME \
             --network auth-network \
             --env-file .env \
             -e DB_HOST=$DB_CONTAINER_NAME \
             -t $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME
-
-            sleep 5
 
             # Start auth-service container
             docker run -d --name $CONTAINER_NAME \
