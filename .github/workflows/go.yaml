@@ -59,6 +59,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Create .env file for CI
+        run: |
+          echo "POSTGRES_DB=auth" >> build/.env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> build/.env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> build/.env
+          echo "DB_PORT=5432" >> build/.env
+          echo "MIGRATION_DIR=./migrations" >> build/.env
+          echo "SERVER_HOST=0.0.0.0" >> build/.env
+          echo "SERVER_PORT=50051" >> build/.env
+
       - name: Login to Docker Registry
         run: docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
 
