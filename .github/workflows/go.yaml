@@ -61,13 +61,15 @@ jobs:
 
       - name: Create .env file for CI
         run: |
+          echo "DB_HOST=$DB_CONTAINER_NAME" >> build/.env
+          echo "DB_PORT=5432" >> build/.env
           echo "POSTGRES_DB=auth" >> build/.env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> build/.env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> build/.env
-          echo "DB_PORT=5432" >> build/.env
           echo "MIGRATION_DIR=./migrations" >> build/.env
           echo "SERVER_HOST=0.0.0.0" >> build/.env
           echo "SERVER_PORT=50051" >> build/.env
+          echo "LOG_OUT_DIR=./out/log" >> build/.env
 
       - name: Login to Docker Registry
         run: docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
@@ -129,23 +131,22 @@ jobs:
             -p 5432:5432 $DB_IMAGE_NAME
 
             # Create .env file for migrator
+            echo "DB_HOST=$DB_CONTAINER_NAME" >> .env
+            echo "DB_PORT=5432" >> .env
             echo "POSTGRES_DB=auth" >> .env
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-            echo "DB_PORT=5432" >> .env
             echo "MIGRATION_DIR=./migrations" >> .env
 
             # Start migrator container
             docker run -d --name $MIGRATOR_CONTAINER_NAME \
             --network $NETWORK \
             --env-file .env \
-            -e DB_HOST=$DB_CONTAINER_NAME \
             -t $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME
 
             # Start auth-service container
             docker run -d --name $CONTAINER_NAME \
             --network $NETWORK \
-            -e DB_HOST=$DB_CONTAINER_NAME \
             -p 50051:50051 \
             -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
             
