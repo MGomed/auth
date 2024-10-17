@@ -7,9 +7,13 @@ on:
     branches: [ main, master ]
 
 env:
-  REGISTRY: "cr.selcloud.ru/olezhek28"
-  IMAGE_NAME: "crud-server"
-  CONTAINER_NAME: "crud-server-container"
+  REGISTRY: "cr.selcloud.ru/mgomed"
+  IMAGE_NAME: "auth-service"
+  CONTAINER_NAME: "auth-service-container"
+  MIGRATOR_IMAGE_NAME: "auth-migrator"
+  MIGRATOR_CONTAINER_NAME: "auth-migrator-container"
+  DB_IMAGE_NAME: "postgres:14-alpine3.17"
+  DB_CONTAINER_NAME: "auth-db-container"
 
 jobs:
   build-and-test:
@@ -58,8 +62,14 @@ jobs:
       - name: Login to Docker Registry
         run: docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
 
-      - name: Build and Push Docker Image
+      - name: Build and Push auth-service Image
         run: |
           TAG_NAME=$(echo $GITHUB_SHA | head -c7)
           docker buildx create --use
-          docker buildx build --no-cache --push --tag $REGISTRY/$IMAGE_NAME:$TAG_NAME -f week_2/grpc/Dockerfile week_2/grpc/ 
+          docker buildx build --no-cache --push --tag $REGISTRY/$IMAGE_NAME:$TAG_NAME -f build/Dockerfile.app .
+
+      - name: Build and Push auth-service Image
+        run: |
+          TAG_NAME=$(echo $GITHUB_SHA | head -c7)
+          docker buildx create --use
+          docker buildx build --no-cache --push --tag $REGISTRY/$MIGRATOT_IMAGE_NAME:$TAG_NAME -f build/Dockerfile.migrations build 
