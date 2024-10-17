@@ -101,7 +101,6 @@ jobs:
           script: |
             # Set up variables
             TAG_NAME=$(echo $GITHUB_SHA | head -c7)
-            NETWORK=auth-network
 
             # Login into Selectel Registry
             docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} $REGISTRY
@@ -123,7 +122,7 @@ jobs:
 
             # Start db container
             docker run -d --name $DB_CONTAINER_NAME \
-            --network $NETWORK \
+            --network auth-network \
             -e POSTGRES_DB=auth \
             -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
             -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
@@ -140,13 +139,13 @@ jobs:
 
             # Start migrator container
             docker run -d --name $MIGRATOR_CONTAINER_NAME \
-            --network $NETWORK \
+            --network auth-network \
             --env-file .env \
             -t $REGISTRY/$MIGRATOR_IMAGE_NAME:$TAG_NAME
 
             # Start auth-service container
             docker run -d --name $CONTAINER_NAME \
-            --network $NETWORK \
+            --network auth-network \
             -p 50051:50051 \
             -t $REGISTRY/$IMAGE_NAME:$TAG_NAME
             
