@@ -8,7 +8,7 @@ import (
 
 	domain "github.com/MGomed/auth/internal/domain"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgtype"
+	pgtype "github.com/jackc/pgtype"
 	pgxpool "github.com/jackc/pgx/v4/pgxpool"
 )
 

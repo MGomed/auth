@@ -1,5 +1,5 @@
 volumes:
-  postgres_volume:
+  auth_volume:
 
 services:
   pg:
@@ -11,7 +11,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - postgres_volume:/var/lib/postgresql/data
+      - auth_volume:/var/lib/postgresql/data
 
   migrator:
     build:

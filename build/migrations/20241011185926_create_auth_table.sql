@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS auth (
     email VARCHAR NOT NULL,
     password VARCHAR NOT NULL,
     role role NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );
 
