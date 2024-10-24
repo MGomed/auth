@@ -14,6 +14,11 @@ const logTimeLayout = "02-01-2006_03:04:05"
 
 var errOpen = errors.New("couldn't open log file")
 
+// Config defines logger config interface
+type Config interface {
+	OutDir() string
+}
+
 // InitLogger initiate auth service logger
 func InitLogger(conf config.LoggerConfig) (*log.Logger, error) {
 	logFileName := fmt.Sprintf("%s/auth_%s.log", conf.OutDir(), time.Now().Format(logTimeLayout))
