@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS auth (
     password VARCHAR NOT NULL,
     role role NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- +goose Down
