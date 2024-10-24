@@ -2,6 +2,8 @@ LOCAL_BIN:=$(CURDIR)/bin
 API_PROTO:=user_api_v1
 API:=user_api
 
+BUILD_DIR:=build
+
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
 
@@ -26,3 +28,9 @@ generate-user-api:
 	--go-grpc_out=pkg/$(API) --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/$(API_PROTO)/*
+
+db-up:
+	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d pg migrator
+
+db-down:
+	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator
