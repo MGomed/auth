@@ -13,6 +13,7 @@ import (
 	auth_service "github.com/MGomed/auth/internal/service/auth"
 	db "github.com/MGomed/auth/pkg/client/db"
 	pg "github.com/MGomed/auth/pkg/client/db/pg"
+	transaction "github.com/MGomed/auth/pkg/client/db/transaction"
 	closer "github.com/MGomed/auth/pkg/closer"
 	logger "github.com/MGomed/auth/pkg/logger"
 )
@@ -23,7 +24,8 @@ type serviceProvider struct {
 	pgConfig  config.PgConfig
 	apiConfig config.APIConfig
 
-	dbc db.Client
+	dbc   db.Client
+	txMgr db.TxManager
 
 	repo repository.Repository
 
@@ -73,6 +75,7 @@ func (p *serviceProvider) Logger() *log.Logger {
 	return p.logger
 }
 
+// DBClient init/get DBClient
 func (p *serviceProvider) DBClient(ctx context.Context) db.Client {
 	if p.dbc == nil {
 		dbc, err := pg.New(ctx, p.Logger(), p.PgConfig().DSN())
@@ -92,6 +95,14 @@ func (p *serviceProvider) DBClient(ctx context.Context) db.Client {
 	return p.dbc
 }
 
+func (p *serviceProvider) TxManager(ctx context.Context) db.TxManager {
+	if p.txMgr == nil {
+		p.txMgr = transaction.NewTransactionManager(p.DBClient(ctx).DB())
+	}
+
+	return p.txMgr
+}
+
 // Repository init/get Repository
 func (p *serviceProvider) Repository(ctx context.Context) repository.Repository {
 	if p.repo == nil {
@@ -104,7 +115,7 @@ func (p *serviceProvider) Repository(ctx context.Context) repository.Repository 
 // Service init/get Service(usecases)
 func (p *serviceProvider) Service(ctx context.Context) service.Service {
 	if p.service == nil {
-		p.service = auth_service.NewService(p.Logger(), p.Repository(ctx))
+		p.service = auth_service.NewService(p.Logger(), p.Repository(ctx), p.TxManager(ctx))
 	}
 
 	return p.service

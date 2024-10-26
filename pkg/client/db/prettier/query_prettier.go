@@ -6,11 +6,13 @@ import (
 	"strings"
 )
 
+// Query placeholders
 const (
 	PlaceholderDollar   = "$"
 	PlaceholderQuestion = "?"
 )
 
+// Pretty return query in pretty style
 func Pretty(query string, placeholder string, args ...any) string {
 	for i, param := range args {
 		var value string

@@ -87,8 +87,7 @@ func (c *Closer) CloseAll() {
 		}
 
 		if err := g.Wait(); err != nil {
-			fmt.Println("AJJAJAAJ")
-			log.Printf("error returned from Closer: %v\n", err) 
+			log.Printf("error returned from Closer: %v\n", err)
 		}
 	})
 }
