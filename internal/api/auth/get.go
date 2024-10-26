@@ -15,6 +15,6 @@ func (s *API) Get(ctx context.Context, req *user_api.GetRequest) (*user_api.GetR
 	}
 
 	return &user_api.GetResponse{
-		User: service_model.ToUserFromService(resp),
+		User: service_model.ToUserInfoFromService(resp),
 	}, nil
 }

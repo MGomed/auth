@@ -11,7 +11,7 @@ type service struct {
 	repo   repository.Repository
 }
 
-// NewUserAPIUsecase is a usecase constructor
+// NewService is a service constructor
 func NewService(logger *log.Logger, repo repository.Repository) *service {
 	return &service{
 		logger: logger,

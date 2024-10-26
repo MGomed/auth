@@ -4,8 +4,6 @@ import (
 	"context"
 	"log"
 
-	pgxpool "github.com/jackc/pgx/v4/pgxpool"
-
 	auth_api "github.com/MGomed/auth/internal/api/auth"
 	config "github.com/MGomed/auth/internal/config"
 	env_config "github.com/MGomed/auth/internal/config/env"
@@ -13,15 +11,19 @@ import (
 	auth_repo "github.com/MGomed/auth/internal/repository/auth"
 	service "github.com/MGomed/auth/internal/service"
 	auth_service "github.com/MGomed/auth/internal/service/auth"
+	db "github.com/MGomed/auth/pkg/client/db"
+	pg "github.com/MGomed/auth/pkg/client/db/pg"
+	closer "github.com/MGomed/auth/pkg/closer"
 	logger "github.com/MGomed/auth/pkg/logger"
 )
 
 type serviceProvider struct {
 	logger *log.Logger
 
-	loggerConfig config.LoggerConfig
-	pgConfig     config.PgConfig
-	apiConfig    config.APIConfig
+	pgConfig  config.PgConfig
+	apiConfig config.APIConfig
+
+	dbc db.Client
 
 	repo repository.Repository
 
@@ -34,19 +36,7 @@ func newServiceProvider() *serviceProvider {
 	return &serviceProvider{}
 }
 
-func (p *serviceProvider) LoggerConfig() config.LoggerConfig {
-	if p.loggerConfig == nil {
-		cfg, err := env_config.NewLoggerConfig()
-		if err != nil {
-			log.Fatalf("failed to create logger config: %v", err)
-		}
-
-		p.loggerConfig = cfg
-	}
-
-	return p.loggerConfig
-}
-
+// PgConfig init/get postgres config
 func (p *serviceProvider) PgConfig() config.PgConfig {
 	if p.pgConfig == nil {
 		cfg, err := env_config.NewPgConfig()
@@ -60,9 +50,10 @@ func (p *serviceProvider) PgConfig() config.PgConfig {
 	return p.pgConfig
 }
 
-func (p *serviceProvider) ApiConfig() config.APIConfig {
+// APIConfig init/get api(grpc) config
+func (p *serviceProvider) APIConfig() config.APIConfig {
 	if p.apiConfig == nil {
-		cfg, err := env_config.NewApiConfig()
+		cfg, err := env_config.NewAPIConfig()
 		if err != nil {
 			log.Fatalf("failed to create api config: %v", err)
 		}
@@ -73,32 +64,44 @@ func (p *serviceProvider) ApiConfig() config.APIConfig {
 	return p.apiConfig
 }
 
+// Logger init/get logger
 func (p *serviceProvider) Logger() *log.Logger {
 	if p.logger == nil {
-		logger, err := logger.InitLogger(p.LoggerConfig())
-		if err != nil {
-			log.Fatalf("failed to init logger: %v", err)
-		}
-
-		p.logger = logger
+		p.logger = logger.InitLogger()
 	}
 
 	return p.logger
 }
 
-func (p *serviceProvider) Repository(ctx context.Context) repository.Repository {
-	if p.repo == nil {
-		pool, err := pgxpool.Connect(ctx, p.PgConfig().DSN())
+func (p *serviceProvider) DBClient(ctx context.Context) db.Client {
+	if p.dbc == nil {
+		dbc, err := pg.New(ctx, p.Logger(), p.PgConfig().DSN())
 		if err != nil {
-			log.Fatalf("failed to connect to database: %v", err)
+			log.Fatalf("failed to create db client: %v", err)
 		}
 
-		p.repo = auth_repo.NewRepository(pool)
+		err = dbc.DB().Ping(ctx)
+		if err != nil {
+			log.Fatalf("ping error: %s", err.Error())
+		}
+		closer.Add(dbc.Close)
+
+		p.dbc = dbc
+	}
+
+	return p.dbc
+}
+
+// Repository init/get Repository
+func (p *serviceProvider) Repository(ctx context.Context) repository.Repository {
+	if p.repo == nil {
+		p.repo = auth_repo.NewRepository(p.DBClient(ctx))
 	}
 
 	return p.repo
 }
 
+// Service init/get Service(usecases)
 func (p *serviceProvider) Service(ctx context.Context) service.Service {
 	if p.service == nil {
 		p.service = auth_service.NewService(p.Logger(), p.Repository(ctx))
@@ -107,6 +110,7 @@ func (p *serviceProvider) Service(ctx context.Context) service.Service {
 	return p.service
 }
 
+// API init/get API(grpc implementation)
 func (p *serviceProvider) API(ctx context.Context) *auth_api.API {
 	if p.api == nil {
 		p.api = auth_api.NewAPI(p.Logger(), p.Service(ctx))

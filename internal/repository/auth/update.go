@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	service_model "github.com/MGomed/auth/internal/model"
+	"github.com/MGomed/auth/pkg/client/db"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
 // UpdateUser updates a user in Postgres DB
-func (a *repository) UpdateUser(ctx context.Context, user *service_model.User) (int64, error) {
+func (a *repository) UpdateUser(ctx context.Context, user *service_model.UserUpdate) (int64, error) {
 	builder := sq.Update(authTable).
 		PlaceholderFormat(sq.Dollar)
 
@@ -18,16 +19,8 @@ func (a *repository) UpdateUser(ctx context.Context, user *service_model.User) (
 		builder = builder.Set(nameColumn, user.Name)
 	}
 
-	if user.Password != nil {
-		builder = builder.Set(passwordColumn, user.Password)
-	}
-
 	if user.Role != nil {
 		builder = builder.Set(roleColumn, user.Role)
-	}
-
-	if user.UpdatedAt != nil {
-		builder = builder.Set(updatedAtColumn, user.UpdatedAt)
 	}
 
 	builder = builder.Where(sq.Eq{idColumn: user.ID})
@@ -37,7 +30,12 @@ func (a *repository) UpdateUser(ctx context.Context, user *service_model.User) (
 		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
-	res, err := a.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repo.Update",
+		QueryRaw: query,
+	}
+
+	res, err := a.dbc.DB().Exec(ctx, q, args...)
 	if err != nil {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}

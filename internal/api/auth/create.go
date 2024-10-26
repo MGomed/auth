@@ -9,7 +9,7 @@ import (
 
 // Create creates new user
 func (s *API) Create(ctx context.Context, req *user_api.CreateRequest) (*user_api.CreateResponse, error) {
-	resp, err := s.service.Create(ctx, service_model.ToUserFromApi(req.User))
+	resp, err := s.service.Create(ctx, service_model.ToUserCreateFromAPI(req.User))
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 
-	pgxpool "github.com/jackc/pgx/v4/pgxpool"
+	db "github.com/MGomed/auth/pkg/client/db"
 )
 
 const (
@@ -24,12 +24,12 @@ var (
 )
 
 type repository struct {
-	pool *pgxpool.Pool
+	dbc db.Client
 }
 
 // NewRepository is repository struct constructor
-func NewRepository(pool *pgxpool.Pool) *repository {
+func NewRepository(dbc db.Client) *repository {
 	return &repository{
-		pool: pool,
+		dbc: dbc,
 	}
 }

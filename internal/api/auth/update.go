@@ -11,7 +11,7 @@ import (
 
 // Update modifies user information
 func (s *API) Update(ctx context.Context, req *user_api.UpdateRequest) (*empty.Empty, error) {
-	err := s.service.Update(ctx, service_model.ToUserFromApi(req.User))
+	err := s.service.Update(ctx, service_model.ToUserUpdateFromAPI(req.User))
 	if err != nil {
 		return nil, err
 	}

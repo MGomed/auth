@@ -9,8 +9,3 @@ type APIConfig interface {
 type PgConfig interface {
 	DSN() string
 }
-
-// LoggerConfig is logger config interface
-type LoggerConfig interface {
-	OutDir() string
-}

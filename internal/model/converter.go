@@ -2,73 +2,49 @@ package model
 
 import (
 	api "github.com/MGomed/auth/pkg/user_api"
-	"google.golang.org/protobuf/types/known/timestamppb"
-	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func ToUserFromService(user *User) *api.User {
-	var res api.User
-	if user.ID != nil {
-		res.Id = wrapperspb.Int64(*user.ID)
-	}
-
-	if user.Name != nil {
-		res.Name = wrapperspb.String(*user.Name)
-	}
-
-	if user.Email != nil {
-		res.Email = wrapperspb.String(*user.Email)
-	}
-
-	if user.Password != nil {
-		res.Password = wrapperspb.String(*user.Password)
-	}
-
-	if user.Role != nil {
-		res.Role = api.Role(api.Role_value[*user.Role])
-	}
-
-	if user.CreatedAt != nil {
-		res.CreatedAt = timestamppb.New(*user.CreatedAt)
-	}
-
+// ToUserInfoFromService converts UserInfo to api.UserInfo
+func ToUserInfoFromService(user *UserInfo) *api.UserInfo {
+	var updatedAt *timestamppb.Timestamp
 	if user.UpdatedAt != nil {
-		res.UpdatedAt = timestamppb.New(*user.UpdatedAt)
+		updatedAt = timestamppb.New(*user.UpdatedAt)
 	}
 
-	return &res
+	return &api.UserInfo{
+		Id:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Role:      api.Role(api.Role_value[user.Role]),
+		CreatedAt: timestamppb.New(user.CreatedAt),
+		UpdatedAt: updatedAt,
+	}
 }
 
-func ToUserFromApi(user *api.User) *User {
-	var res User
-	if user.Id != nil {
-		res.ID = &user.Id.Value
+// ToUserCreateFromAPI converts api.UserCreate to UserCreate
+func ToUserCreateFromAPI(user *api.UserCreate) *UserCreate {
+	return &UserCreate{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: []byte(user.Password),
+		Role:     RoleNames[int32(user.Role)],
 	}
+}
 
-	if user.Name != nil {
-		res.Name = &user.Name.Value
-	}
+// ToUserUpdateFromAPI converts api.UserUpdate to UserUpdate
+func ToUserUpdateFromAPI(user *api.UserUpdate) *UserUpdate {
+	var res UserUpdate
 
-	if user.Email != nil {
-		res.Email = &user.Email.Value
-	}
+	res.ID = user.Id
 
-	if user.Password != nil {
-		res.Password = &user.Password.Value
+	if val := user.Name.GetValue(); val != "" {
+		res.Name = &val
 	}
 
 	role := api.Role_name[int32(user.Role)]
 	res.Role = &role
-
-	if user.CreatedAt != nil {
-		createdAt := user.CreatedAt.AsTime()
-		res.CreatedAt = &createdAt
-	}
-
-	if user.UpdatedAt != nil {
-		updatedAt := user.UpdatedAt.AsTime()
-		res.UpdatedAt = &updatedAt
-	}
 
 	return &res
 }

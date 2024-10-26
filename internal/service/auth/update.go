@@ -7,7 +7,7 @@ import (
 )
 
 // Update modifies user information
-func (s *service) Update(ctx context.Context, user *service_model.User) error {
+func (s *service) Update(ctx context.Context, user *service_model.UserUpdate) error {
 	_, err := s.repo.UpdateUser(ctx, user)
 	if err != nil {
 		s.logger.Printf("Failed to update user from database: %v", err)

@@ -5,19 +5,23 @@ import (
 	"flag"
 	"net"
 
+	grpc "google.golang.org/grpc"
+	reflection "google.golang.org/grpc/reflection"
+
 	env_config "github.com/MGomed/auth/internal/config/env"
-	"github.com/MGomed/auth/pkg/user_api"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	closer "github.com/MGomed/auth/pkg/closer"
+	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 
 var configPath string
 
+// App represents object for starting grpc server
 type App struct {
 	serviceProvider *serviceProvider
 	server          *grpc.Server
 }
 
+// NewApp is App struct constructor
 func NewApp(ctx context.Context) (*App, error) {
 	flag.StringVar(&configPath, "config-path", "build/.env", "path to config file")
 	flag.Parse()
@@ -31,7 +35,13 @@ func NewApp(ctx context.Context) (*App, error) {
 	return app, nil
 }
 
+// Run starts grpc server
 func (a *App) Run() error {
+	defer func() {
+		closer.CloseAll()
+		closer.Wait()
+	}()
+
 	return a.runGRPCServer()
 }
 
@@ -76,7 +86,7 @@ func (a *App) initGRPCServer(ctx context.Context) error {
 }
 
 func (a *App) runGRPCServer() error {
-	lis, err := net.Listen("tcp", a.serviceProvider.ApiConfig().Address())
+	lis, err := net.Listen("tcp", a.serviceProvider.APIConfig().Address())
 	if err != nil {
 		return err
 	}

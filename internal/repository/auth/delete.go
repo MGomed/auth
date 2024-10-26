@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/MGomed/auth/pkg/client/db"
 	sq "github.com/Masterminds/squirrel"
 )
 
@@ -18,7 +19,12 @@ func (a *repository) DeleteUser(ctx context.Context, id int64) (int64, error) {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryBuild, query, err)
 	}
 
-	res, err := a.pool.Exec(ctx, query, args...)
+	q := db.Query{
+		Name:     "user_repo.Delete",
+		QueryRaw: query,
+	}
+
+	res, err := a.dbc.DB().Exec(ctx, q, args...)
 	if err != nil {
 		return 0, fmt.Errorf("%w - %v : %w", errQueryExecute, query, err)
 	}
