@@ -1,9 +1,8 @@
 package converters
 
 import (
-	api "github.com/MGomed/auth/pkg/user_api"
-	
 	service_model "github.com/MGomed/auth/internal/model"
+	api "github.com/MGomed/auth/pkg/user_api"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
