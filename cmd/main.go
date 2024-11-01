@@ -3,15 +3,13 @@ package main
 import (
 	"context"
 	"log"
-	"time"
 
+	consts "github.com/MGomed/auth/consts"
 	app "github.com/MGomed/auth/internal/app"
 )
 
-const timeout = 15 * time.Second
-
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), consts.ContextTimeout)
 	defer cancel()
 
 	app, err := app.NewApp(ctx)

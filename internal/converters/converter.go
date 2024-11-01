@@ -1,13 +1,18 @@
-package model
+package converters
 
 import (
 	api "github.com/MGomed/auth/pkg/user_api"
-
+	
+	service_model "github.com/MGomed/auth/internal/model"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ToUserInfoFromService converts UserInfo to api.UserInfo
-func ToUserInfoFromService(user *UserInfo) *api.UserInfo {
+func ToUserInfoFromService(user *service_model.UserInfo) *api.UserInfo {
+	if user == nil {
+		return nil
+	}
+
 	var updatedAt *timestamppb.Timestamp
 	if user.UpdatedAt != nil {
 		updatedAt = timestamppb.New(*user.UpdatedAt)
@@ -24,18 +29,26 @@ func ToUserInfoFromService(user *UserInfo) *api.UserInfo {
 }
 
 // ToUserCreateFromAPI converts api.UserCreate to UserCreate
-func ToUserCreateFromAPI(user *api.UserCreate) *UserCreate {
-	return &UserCreate{
+func ToUserCreateFromAPI(user *api.UserCreate) *service_model.UserCreate {
+	if user == nil {
+		return nil
+	}
+
+	return &service_model.UserCreate{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: []byte(user.Password),
-		Role:     RoleNames[int32(user.Role)],
+		Role:     service_model.RoleNames[int32(user.Role)],
 	}
 }
 
 // ToUserUpdateFromAPI converts api.UserUpdate to UserUpdate
-func ToUserUpdateFromAPI(user *api.UserUpdate) *UserUpdate {
-	var res UserUpdate
+func ToUserUpdateFromAPI(user *api.UserUpdate) *service_model.UserUpdate {
+	if user == nil {
+		return nil
+	}
+
+	var res service_model.UserUpdate
 
 	res.ID = user.Id
 

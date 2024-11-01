@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	service_model "github.com/MGomed/auth/internal/model"
+	converters "github.com/MGomed/auth/internal/converters"
 	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 
@@ -15,6 +15,6 @@ func (s *API) Get(ctx context.Context, req *user_api.GetRequest) (*user_api.GetR
 	}
 
 	return &user_api.GetResponse{
-		User: service_model.ToUserInfoFromService(resp),
+		User: converters.ToUserInfoFromService(resp),
 	}, nil
 }
