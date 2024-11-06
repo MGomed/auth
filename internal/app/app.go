@@ -77,6 +77,11 @@ func (a *App) initServiceProvider(_ context.Context) error {
 
 func (a *App) initGRPCServer(ctx context.Context) error {
 	a.server = grpc.NewServer()
+	closer.Add(func() error {
+		a.server.Stop()
+
+		return nil
+	})
 
 	reflection.Register(a.server)
 

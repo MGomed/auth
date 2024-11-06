@@ -1,0 +1,234 @@
+package auth
+
+import (
+	"context"
+	"errors"
+	"io"
+	"log"
+	"testing"
+
+	gomock "github.com/golang/mock/gomock"
+	require "github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/wrapperspb"
+
+	api_errors "github.com/MGomed/auth/internal/api/errors"
+	converters "github.com/MGomed/auth/internal/converters"
+	service_mock "github.com/MGomed/auth/internal/service/mocks"
+	user_api "github.com/MGomed/auth/pkg/user_api"
+)
+
+var (
+	ctx    context.Context
+	logger *log.Logger
+
+	ctl *gomock.Controller
+
+	mockService *service_mock.MockService
+
+	api *API
+
+	errTest = errors.New("test")
+)
+
+func BeforeSuite(t *testing.T) {
+	ctx = context.Background()
+	logger = log.New(io.Discard, "", 0)
+
+	ctl = gomock.NewController(t)
+	mockService = service_mock.NewMockService(ctl)
+
+	api = &API{logger: logger, service: mockService}
+
+	t.Cleanup(ctl.Finish)
+}
+
+func TestCreate(t *testing.T) {
+	BeforeSuite(t)
+
+	t.Run("Sunny case", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name:            "Alex",
+				Email:           "Alex@mail.com",
+				Password:        "Password",
+				PasswordConfirm: "Password",
+			}
+
+			expectedID = int64(101)
+		)
+
+		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(expectedID, nil)
+
+		resp, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+
+		require.Equal(t, resp.Id, expectedID)
+		require.Equal(t, nil, err)
+	})
+
+	t.Run("Rainy case", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name:            "Alex",
+				Email:           "Alex@mail.com",
+				Password:        "Password",
+				PasswordConfirm: "Password",
+			}
+		)
+
+		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(int64(0), errTest)
+
+		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+
+		require.Equal(t, errTest, err)
+	})
+
+	t.Run("Rainy case (too short name)", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name: "A",
+			}
+		)
+
+		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+		require.Equal(t, api_errors.ErrNameLenInvalid, err)
+	})
+
+	t.Run("Rainy case (wrong email - 1)", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name:  "Alex",
+				Email: "Alex_mail.com",
+			}
+		)
+
+		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+		require.Equal(t, errors.Is(err, api_errors.ErrEmailInvalid), true)
+	})
+
+	t.Run("Rainy case (wrong email - 2)", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name:  "Alex",
+				Email: "Alex@mail_com",
+			}
+		)
+
+		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+		require.Equal(t, errors.Is(err, api_errors.ErrEmailInvalid), true)
+	})
+
+	t.Run("Rainy case (password mismatch)", func(t *testing.T) {
+		var (
+			user = &user_api.UserCreate{
+				Name:            "Alex",
+				Email:           "Alex@mail.com",
+				Password:        "pass1",
+				PasswordConfirm: "pass2",
+			}
+		)
+
+		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
+		require.Equal(t, api_errors.ErrPasswordMismatch, err)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	BeforeSuite(t)
+
+	t.Run("Sunny case", func(t *testing.T) {
+		var (
+			id = int64(101)
+		)
+
+		mockService.EXPECT().Delete(ctx, id).Return(nil)
+
+		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
+		require.Equal(t, nil, err)
+	})
+
+	t.Run("Rainy case", func(t *testing.T) {
+		var (
+			id = int64(101)
+		)
+
+		mockService.EXPECT().Delete(ctx, id).Return(errTest)
+
+		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
+		require.Equal(t, errTest, err)
+	})
+}
+
+func TestGet(t *testing.T) {
+	BeforeSuite(t)
+
+	t.Run("Sunny case", func(t *testing.T) {
+		var (
+			id = int64(101)
+		)
+
+		mockService.EXPECT().Get(ctx, id).Return(nil, nil)
+
+		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
+		require.Equal(t, nil, err)
+	})
+
+	t.Run("Rainy case", func(t *testing.T) {
+		var (
+			id = int64(101)
+		)
+
+		mockService.EXPECT().Get(ctx, id).Return(nil, errTest)
+
+		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
+		require.Equal(t, errTest, err)
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	BeforeSuite(t)
+
+	t.Run("Sunny case", func(t *testing.T) {
+		var (
+			user = &user_api.UserUpdate{
+				Id: int64(101),
+				Name: &wrapperspb.StringValue{
+					Value: "Alex",
+				},
+			}
+		)
+
+		mockService.EXPECT().Update(ctx, converters.ToUserUpdateFromAPI(user)).Return(nil)
+
+		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
+		require.Equal(t, nil, err)
+	})
+
+	t.Run("Rainy case", func(t *testing.T) {
+		var (
+			user = &user_api.UserUpdate{
+				Id: int64(101),
+				Name: &wrapperspb.StringValue{
+					Value: "Alex",
+				},
+				Role: user_api.Role_UNKNOWN,
+			}
+		)
+
+		mockService.EXPECT().Update(ctx, converters.ToUserUpdateFromAPI(user)).Return(errTest)
+
+		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
+		require.Equal(t, errTest, err)
+	})
+
+	t.Run("Rainy case (too short name)", func(t *testing.T) {
+		var (
+			user = &user_api.UserUpdate{
+				Id:   int64(101),
+				Role: user_api.Role_UNKNOWN,
+			}
+		)
+
+		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
+		require.Equal(t, api_errors.ErrNameLenInvalid, err)
+	})
+}

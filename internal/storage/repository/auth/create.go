@@ -9,7 +9,7 @@ import (
 
 	consts "github.com/MGomed/auth/consts"
 	service_model "github.com/MGomed/auth/internal/model"
-	errors "github.com/MGomed/auth/internal/repository/errors"
+	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
 	db "github.com/MGomed/auth/pkg/client/db"
 )
 
@@ -28,7 +28,7 @@ func (a *repository) CreateUser(ctx context.Context, user *service_model.UserCre
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("%w - %v : %w", errors.ErrQueryBuild, query, err)
+		return 0, fmt.Errorf("%w - %v : %w", repo_errors.ErrQueryBuild, query, err)
 	}
 
 	q := db.Query{
@@ -39,7 +39,7 @@ func (a *repository) CreateUser(ctx context.Context, user *service_model.UserCre
 	var userID int64
 	err = a.dbc.DB().QueryRow(ctx, q, args...).Scan(&userID)
 	if err != nil {
-		return 0, fmt.Errorf("%w - %v : %w", errors.ErrQueryExecute, query, err)
+		return 0, fmt.Errorf("%w - %v : %w", repo_errors.ErrQueryExecute, query, err)
 	}
 
 	return userID, nil

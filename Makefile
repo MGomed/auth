@@ -7,6 +7,12 @@ BUILD_DIR:=build
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
 
+.PHONY: test
+test:
+	go clean -testcache
+	go test -coverprofile out/coverage/cover.out ./...
+	go tool cover -html=cover.out -o out/coverage/coverage.html
+
 install-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
@@ -19,6 +25,10 @@ get-deps:
 
 generate:
 	make generate-user-api
+	make generate_mocks
+
+generate_mocks:
+	./generate.sh
 
 generate-user-api:
 	mkdir -p pkg/$(API)

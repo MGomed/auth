@@ -6,6 +6,8 @@ import (
 	service_model "github.com/MGomed/auth/internal/model"
 )
 
+//go:generate mockgen -destination=./mocks/service_mock.go -package=mocks -source=interfaces.go
+
 // Service interface of user_api usecase
 type Service interface {
 	Create(ctx context.Context, user *service_model.UserCreate) (int64, error)

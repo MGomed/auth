@@ -7,6 +7,8 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 )
 
+//go:generate mockgen -destination=./mocks/db_mock.go -package=mocks -source=interfaces.go
+
 // Handler is func which called in transaction
 type Handler func(ctx context.Context) error
 

@@ -6,7 +6,7 @@ import (
 	"os"
 
 	consts "github.com/MGomed/auth/consts"
-	errors "github.com/MGomed/auth/internal/config/errors"
+	config_errors "github.com/MGomed/auth/internal/config/errors"
 )
 
 type grpcConfig struct {
@@ -18,12 +18,12 @@ type grpcConfig struct {
 func NewAPIConfig() (*grpcConfig, error) {
 	host := os.Getenv(consts.ServerHostEnv)
 	if len(host) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.ServerHostEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.ServerHostEnv)
 	}
 
 	port := os.Getenv(consts.ServerPortEnv)
 	if len(port) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.ServerPortEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.ServerPortEnv)
 	}
 
 	return &grpcConfig{

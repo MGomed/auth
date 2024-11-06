@@ -27,7 +27,7 @@ func NewAPI(logger *log.Logger, service service.Service) *API {
 }
 
 func validateName(name string) error {
-	if n := len([]rune(name)); n < 2 && n > 32 {
+	if n := len([]rune(name)); n < 2 || n > 32 {
 		return errors.ErrNameLenInvalid
 	}
 
