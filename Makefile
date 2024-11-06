@@ -2,7 +2,7 @@ LOCAL_BIN:=$(CURDIR)/bin
 API_PROTO:=user_api_v1
 API:=user_api
 
-BUILD_DIR:=./build
+BUILD_DIR:=build
 
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml

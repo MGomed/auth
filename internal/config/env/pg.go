@@ -3,14 +3,9 @@ package env_config
 import (
 	"fmt"
 	"os"
-)
 
-const (
-	pgEnvHost     = "DB_HOST"
-	pgEnvPort     = "DB_PORT"
-	pgEnvDBName   = "POSTGRES_DB"
-	pgEnvUser     = "POSTGRES_USER"
-	pgEnvPassword = "POSTGRES_PASSWORD" //nolint: gosec
+	"github.com/MGomed/auth/consts"
+	errors "github.com/MGomed/auth/internal/config/errors"
 )
 
 type pgConfig struct {
@@ -23,29 +18,29 @@ type pgConfig struct {
 
 // NewPgConfig is pgConfig struct constructor
 func NewPgConfig() (*pgConfig, error) {
-	host := os.Getenv(pgEnvHost)
+	host := os.Getenv(consts.DBHostEnv)
 	if len(host) == 0 {
-		return nil, fmt.Errorf("%w: %v", errEnvNotFound, pgEnvHost)
+		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBHostEnv)
 	}
 
-	port := os.Getenv(pgEnvPort)
+	port := os.Getenv(consts.DBPortEnv)
 	if len(port) == 0 {
-		return nil, fmt.Errorf("%w: %v", errEnvNotFound, pgEnvPort)
+		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBPortEnv)
 	}
 
-	dbName := os.Getenv(pgEnvDBName)
+	dbName := os.Getenv(consts.DBNameEnv)
 	if len(dbName) == 0 {
-		return nil, fmt.Errorf("%w: %v", errEnvNotFound, pgEnvDBName)
+		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBNameEnv)
 	}
 
-	user := os.Getenv(pgEnvUser)
+	user := os.Getenv(consts.DBUserEnv)
 	if len(user) == 0 {
-		return nil, fmt.Errorf("%w: %v", errEnvNotFound, pgEnvUser)
+		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBUserEnv)
 	}
 
-	password := os.Getenv(pgEnvPassword)
+	password := os.Getenv(consts.DBPasswordEnv)
 	if len(password) == 0 {
-		return nil, fmt.Errorf("%w: %v", errEnvNotFound, pgEnvPassword)
+		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBPasswordEnv)
 	}
 
 	return &pgConfig{
