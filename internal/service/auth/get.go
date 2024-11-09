@@ -10,13 +10,11 @@ import (
 
 // Get gets user by id
 func (s *service) Get(ctx context.Context, id int64) (*service_model.UserInfo, error) {
-	user, err := s.cache.GetUser(ctx, id);
+	user, err := s.cache.GetUser(ctx, id)
 	if err == nil {
 		return user, nil
-	} else {
-		if !errors.Is(err, cache_errors.ErrUserNotPresent) {
-			return nil, err
-		}
+	} else if !errors.Is(err, cache_errors.ErrUserNotPresent) {
+		return nil, err
 	}
 
 	user, err = s.repo.GetUser(ctx, id)

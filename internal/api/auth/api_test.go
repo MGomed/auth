@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	require "github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 	api_errors "github.com/MGomed/auth/internal/api/errors"
 	converters "github.com/MGomed/auth/internal/converters"
@@ -25,7 +25,7 @@ var (
 
 	mockService *service_mock.MockService
 
-	api *API
+	api *UserAPI
 
 	errTest = errors.New("test")
 )
@@ -37,7 +37,7 @@ func BeforeSuite(t *testing.T) {
 	ctl = gomock.NewController(t)
 	mockService = service_mock.NewMockService(ctl)
 
-	api = &API{logger: logger, service: mockService}
+	api = &UserAPI{logger: logger, service: mockService}
 
 	t.Cleanup(ctl.Finish)
 }

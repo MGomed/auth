@@ -38,7 +38,7 @@ type serviceProvider struct {
 
 	service service.Service
 
-	api *auth_api.API
+	api *auth_api.UserAPI
 }
 
 func newServiceProvider() *serviceProvider {
@@ -139,6 +139,7 @@ func (p *serviceProvider) RedisClient(ctx context.Context) cache.RedisClient {
 	return p.redisClient
 }
 
+// TxManager init/get TxManager
 func (p *serviceProvider) TxManager(ctx context.Context) db.TxManager {
 	if p.txMgr == nil {
 		p.txMgr = transaction.NewTransactionManager(p.DBClient(ctx).DB())
@@ -175,7 +176,7 @@ func (p *serviceProvider) Service(ctx context.Context) service.Service {
 }
 
 // API init/get API(grpc implementation)
-func (p *serviceProvider) API(ctx context.Context) *auth_api.API {
+func (p *serviceProvider) API(ctx context.Context) *auth_api.UserAPI {
 	if p.api == nil {
 		p.api = auth_api.NewAPI(p.Logger(), p.Service(ctx))
 	}

@@ -9,7 +9,7 @@ import (
 // Create creates new user
 func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (int64, error) {
 	var (
-		id int64
+		id       int64
 		userInfo *service_model.UserInfo
 	)
 

@@ -10,8 +10,8 @@ import (
 	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 
-// API implements UserAPI grpc server
-type API struct {
+// UserAPI implements UserAPI grpc server
+type UserAPI struct {
 	user_api.UnimplementedUserAPIServer
 
 	logger  *log.Logger
@@ -19,8 +19,8 @@ type API struct {
 }
 
 // NewAPI is api struct constructor
-func NewAPI(logger *log.Logger, service service.Service) *API {
-	return &API{
+func NewAPI(logger *log.Logger, service service.Service) *UserAPI {
+	return &UserAPI{
 		logger:  logger,
 		service: service,
 	}

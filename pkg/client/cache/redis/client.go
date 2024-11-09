@@ -27,7 +27,7 @@ func NewClient(logger *log.Logger, pool *go_redis.Pool, connTimeout time.Duratio
 
 // HashSet wraps HSET redis command
 func (c *client) HashSet(ctx context.Context, key string, values interface{}) error {
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		_, err := conn.Do("HSET", go_redis.Args{key}.AddFlat(values)...)
 		if err != nil {
 			return err
@@ -44,7 +44,7 @@ func (c *client) HashSet(ctx context.Context, key string, values interface{}) er
 
 // Set wraps SET redis command
 func (c *client) Set(ctx context.Context, key string, value interface{}) error {
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		_, err := conn.Do("SET", go_redis.Args{key}.Add(value)...)
 		if err != nil {
 			return err
@@ -62,7 +62,7 @@ func (c *client) Set(ctx context.Context, key string, value interface{}) error {
 // HGetAll wraps HGETALL redis command
 func (c *client) HGetAll(ctx context.Context, key string, dest interface{}) error {
 	var values []interface{}
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		var errEx error
 		values, errEx = go_redis.Values(conn.Do("HGETALL", key))
 		if errEx != nil {
@@ -85,7 +85,7 @@ func (c *client) HGetAll(ctx context.Context, key string, dest interface{}) erro
 // Get wraps GET redis command
 func (c *client) Get(ctx context.Context, key string) (interface{}, error) {
 	var value interface{}
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		var errEx error
 		value, errEx = conn.Do("GET", key)
 		if errEx != nil {
@@ -103,7 +103,7 @@ func (c *client) Get(ctx context.Context, key string) (interface{}, error) {
 
 // Del wraps DEL redis command
 func (c *client) Del(ctx context.Context, key string) error {
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		var errEx error
 		_, errEx = conn.Do("DEL", key)
 		if errEx != nil {
@@ -121,7 +121,7 @@ func (c *client) Del(ctx context.Context, key string) error {
 
 // Expire wraps EXPIRE redis command
 func (c *client) Expire(ctx context.Context, key string, expiration time.Duration) error {
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		_, err := conn.Do("EXPIRE", key, int(expiration.Seconds()))
 		if err != nil {
 			return err
@@ -138,7 +138,7 @@ func (c *client) Expire(ctx context.Context, key string, expiration time.Duratio
 
 // Ping wraps PING redis command
 func (c *client) Ping(ctx context.Context) error {
-	err := c.execute(ctx, func(ctx context.Context, conn go_redis.Conn) error {
+	err := c.execute(ctx, func(_ context.Context, conn go_redis.Conn) error {
 		_, err := conn.Do("PING")
 		if err != nil {
 			return err

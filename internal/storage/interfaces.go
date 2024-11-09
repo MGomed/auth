@@ -6,7 +6,7 @@ import (
 	service_model "github.com/MGomed/auth/internal/model"
 )
 
-//go:generate mockgen -destination=./mocks/repository_mock.go -package=mocks -source=interfaces.go
+//go:generate mockgen -destination=./mocks/storage_mock.go -package=mocks -source=interfaces.go
 
 // Repository declaired interface for database communication
 type Repository interface {

@@ -9,7 +9,7 @@ import (
 )
 
 // Delete removes user by id
-func (s *API) Delete(ctx context.Context, req *user_api.DeleteRequest) (*empty.Empty, error) {
+func (s *UserAPI) Delete(ctx context.Context, req *user_api.DeleteRequest) (*empty.Empty, error) {
 	err := s.service.Delete(ctx, req.Id)
 	if err != nil {
 		return nil, err

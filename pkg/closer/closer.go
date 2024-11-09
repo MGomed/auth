@@ -2,7 +2,6 @@ package closer
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -67,7 +66,6 @@ func (c *Closer) Add(f ...func() error) {
 // Wait blocks until all closer functions are done
 func (c *Closer) Wait() {
 	<-c.done
-	fmt.Println("HELLLLLLO")
 }
 
 // CloseAll calls all closer functions

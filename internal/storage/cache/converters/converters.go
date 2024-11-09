@@ -23,8 +23,8 @@ func ToUserInfoFromService(user *service_model.UserInfo) *cache_model.UserInfo {
 		Email:     user.Email,
 		Password:  user.HashedPassword,
 		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: updatedAt,
+		CreatedAt: user.CreatedAt.UnixNano(),
+		UpdatedAt: updatedAt.UnixNano(),
 	}
 }
 
@@ -35,8 +35,9 @@ func ToUserInfoFromCache(user *cache_model.UserInfo) *service_model.UserInfo {
 	}
 
 	var updatedAt *time.Time
-	if !user.UpdatedAt.IsZero() {
-		updatedAt = &user.UpdatedAt
+	if user.UpdatedAt != 0 {
+		res := time.Unix(0, user.UpdatedAt)
+		updatedAt = &res
 	}
 
 	return &service_model.UserInfo{
@@ -44,7 +45,7 @@ func ToUserInfoFromCache(user *cache_model.UserInfo) *service_model.UserInfo {
 		Email:          user.Email,
 		HashedPassword: user.Password,
 		Role:           user.Role,
-		CreatedAt:      user.CreatedAt,
+		CreatedAt:      time.Unix(0, user.CreatedAt),
 		UpdatedAt:      updatedAt,
 	}
 }

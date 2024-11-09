@@ -20,6 +20,7 @@ const (
 	DBPasswordEnv = "POSTGRES_PASSWORD" //nolint: gosec
 )
 
+// Redis env's names
 const (
 	RedisHostEnv              = "REDIS_HOST"
 	RedisPortEnv              = "REDIS_PORT"
@@ -39,4 +40,11 @@ const (
 	RoleColumn      = "role"
 	CreatedAtColumn = "created_at"
 	UpdatedAtColumn = "updated_at"
+)
+
+// Role const names
+const (
+	RoleUnknown = "UNKNOWN"
+	RoleUser    = "USER"
+	RoleAdmin   = "ADMIN"
 )

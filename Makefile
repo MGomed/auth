@@ -9,9 +9,10 @@ lint:
 
 .PHONY: test
 test:
+	mkdir -p out/coverage
 	go clean -testcache
 	go test -coverprofile out/coverage/cover.out ./...
-	go tool cover -html=cover.out -o out/coverage/coverage.html
+	go tool cover -html=out/coverage/cover.out -o out/coverage/coverage.html
 
 install-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
@@ -40,7 +41,7 @@ generate-user-api:
 	api/$(API_PROTO)/*
 
 db-up:
-	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d pg migrator
+	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d pg migrator redis
 
 db-down:
-	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator
+	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator redis

@@ -2,6 +2,9 @@ package auth
 
 import (
 	"context"
+	"errors"
+
+	cache_errors "github.com/MGomed/auth/internal/storage/cache/errors"
 )
 
 // Delete removes user by id
@@ -14,7 +17,9 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 	}
 
 	if err := s.cache.DeleteUser(ctx, id); err != nil {
-		return err
+		if !errors.Is(err, cache_errors.ErrUserNotPresent) {
+			return err
+		}
 	}
 
 	s.logger.Printf("Successfully deleted user: %v", id)

@@ -2,4 +2,4 @@
 /bin/
 /out/
 /build/.env
-*/**mocks
+*/**/mocks
