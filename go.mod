@@ -3,6 +3,7 @@ module github.com/MGomed/auth
 go 1.22.4
 
 require (
+	github.com/MGomed/common v1.0.1
 	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/MGomed/common v1.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -32,14 +32,14 @@ require (
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/georgysavva/scany v1.2.2
+	github.com/georgysavva/scany v1.2.2 // indirect
 	github.com/gomodule/redigo v1.9.2
-	github.com/jackc/pgx/v4 v4.18.3
+	github.com/jackc/pgx/v4 v4.18.3 // indirect
 	github.com/joho/godotenv v1.5.1
-	github.com/pkg/errors v0.9.1
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.9.0
+	golang.org/x/sync v0.9.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
