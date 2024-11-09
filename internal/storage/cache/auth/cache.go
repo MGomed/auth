@@ -3,7 +3,7 @@ package auth
 import (
 	"fmt"
 
-	cache "github.com/MGomed/auth/pkg/client/cache"
+	cache "github.com/MGomed/common/pkg/client/cache"
 )
 
 type cacher struct {

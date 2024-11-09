@@ -9,7 +9,7 @@ import (
 	reflection "google.golang.org/grpc/reflection"
 
 	env_config "github.com/MGomed/auth/internal/config/env"
-	closer "github.com/MGomed/auth/pkg/closer"
+	closer "github.com/MGomed/common/pkg/closer"
 	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 

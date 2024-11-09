@@ -15,7 +15,7 @@ import (
 
 	service_model "github.com/MGomed/auth/internal/model"
 	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
-	db_mock "github.com/MGomed/auth/pkg/client/db/mocks"
+	db_mock "github.com/MGomed/common/pkg/client/db/mocks"
 )
 
 var (

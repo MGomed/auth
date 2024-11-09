@@ -11,7 +11,7 @@ import (
 	repo_converters "github.com/MGomed/auth/internal/storage/repository/converters"
 	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
 	repo_model "github.com/MGomed/auth/internal/storage/repository/model"
-	db "github.com/MGomed/auth/pkg/client/db"
+	db "github.com/MGomed/common/pkg/client/db"
 )
 
 // GetUser gets a user in Postgres DB by id

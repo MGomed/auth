@@ -12,7 +12,7 @@ import (
 
 	service_model "github.com/MGomed/auth/internal/model"
 	cache_converters "github.com/MGomed/auth/internal/storage/cache/converters"
-	cache_mock "github.com/MGomed/auth/pkg/client/cache/mocks"
+	cache_mock "github.com/MGomed/common/pkg/client/cache/mocks"
 )
 
 var (

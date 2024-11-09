@@ -4,7 +4,7 @@ import (
 	"log"
 
 	storage "github.com/MGomed/auth/internal/storage"
-	db "github.com/MGomed/auth/pkg/client/db"
+	db "github.com/MGomed/common/pkg/client/db"
 )
 
 type service struct {
