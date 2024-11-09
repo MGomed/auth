@@ -30,6 +30,9 @@ jobs:
         - name: Build
           run: go build -o ./bin/ -v ./...
 
+        - name: Generate
+          run: go generate ./...
+
         - name: Test
           run: go test -v ./...
 
