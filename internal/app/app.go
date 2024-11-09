@@ -9,8 +9,8 @@ import (
 	reflection "google.golang.org/grpc/reflection"
 
 	env_config "github.com/MGomed/auth/internal/config/env"
-	closer "github.com/MGomed/common/pkg/closer"
 	user_api "github.com/MGomed/auth/pkg/user_api"
+	closer "github.com/MGomed/common/pkg/closer"
 )
 
 var configPath string
