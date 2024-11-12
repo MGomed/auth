@@ -8,7 +8,10 @@ import (
 
 // Create creates new user
 func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (int64, error) {
-	var id int64
+	var (
+		id       int64
+		userInfo *service_model.UserInfo
+	)
 
 	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
 		var errTx error
@@ -19,7 +22,7 @@ func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (i
 			return errTx
 		}
 
-		_, errTx = s.repo.GetUser(ctx, id)
+		userInfo, errTx = s.repo.GetUser(ctx, id)
 		if errTx != nil {
 			return errTx
 		}
@@ -28,8 +31,11 @@ func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (i
 
 		return nil
 	})
-
 	if err != nil {
+		return 0, err
+	}
+
+	if err := s.cache.CreateUser(ctx, id, userInfo); err != nil {
 		return 0, err
 	}
 

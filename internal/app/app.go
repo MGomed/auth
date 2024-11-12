@@ -9,8 +9,8 @@ import (
 	reflection "google.golang.org/grpc/reflection"
 
 	env_config "github.com/MGomed/auth/internal/config/env"
-	closer "github.com/MGomed/auth/pkg/closer"
 	user_api "github.com/MGomed/auth/pkg/user_api"
+	closer "github.com/MGomed/common/pkg/closer"
 )
 
 var configPath string
@@ -77,6 +77,11 @@ func (a *App) initServiceProvider(_ context.Context) error {
 
 func (a *App) initGRPCServer(ctx context.Context) error {
 	a.server = grpc.NewServer()
+	closer.Add(func() error {
+		a.server.Stop()
+
+		return nil
+	})
 
 	reflection.Register(a.server)
 

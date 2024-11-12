@@ -8,10 +8,31 @@ import (
 
 // Update modifies user information
 func (s *service) Update(ctx context.Context, user *service_model.UserUpdate) error {
-	_, err := s.repo.UpdateUser(ctx, user)
-	if err != nil {
-		s.logger.Printf("Failed to update user from database: %v", err)
+	var userInfo *service_model.UserInfo
 
+	err := s.txManager.ReadCommitted(ctx, func(ctx context.Context) error {
+		var errTx error
+		_, errTx = s.repo.UpdateUser(ctx, user)
+		if errTx != nil {
+			s.logger.Printf("Failed to add user in database: %v", errTx)
+
+			return errTx
+		}
+
+		userInfo, errTx = s.repo.GetUser(ctx, user.ID)
+		if errTx != nil {
+			return errTx
+		}
+
+		s.logger.Printf("Successfully added user with id: %v", user.ID)
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	if err := s.cache.CreateUser(ctx, user.ID, userInfo); err != nil {
 		return err
 	}
 

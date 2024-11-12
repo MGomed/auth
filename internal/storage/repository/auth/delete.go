@@ -7,8 +7,8 @@ import (
 	sq "github.com/Masterminds/squirrel"
 
 	consts "github.com/MGomed/auth/consts"
-	errors "github.com/MGomed/auth/internal/repository/errors"
-	db "github.com/MGomed/auth/pkg/client/db"
+	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
+	db "github.com/MGomed/common/pkg/client/db"
 )
 
 // DeleteUser deletes a user in Postgres DB by id
@@ -19,7 +19,7 @@ func (a *repository) DeleteUser(ctx context.Context, id int64) (int64, error) {
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return 0, fmt.Errorf("%w - %v : %w", errors.ErrQueryBuild, query, err)
+		return 0, fmt.Errorf("%w - %v : %w", repo_errors.ErrQueryBuild, query, err)
 	}
 
 	q := db.Query{
@@ -29,7 +29,7 @@ func (a *repository) DeleteUser(ctx context.Context, id int64) (int64, error) {
 
 	res, err := a.dbc.DB().Exec(ctx, q, args...)
 	if err != nil {
-		return 0, fmt.Errorf("%w - %v : %w", errors.ErrQueryExecute, query, err)
+		return 0, fmt.Errorf("%w - %v : %w", repo_errors.ErrQueryExecute, query, err)
 	}
 
 	return res.RowsAffected(), nil

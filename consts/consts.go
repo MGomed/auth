@@ -20,6 +20,15 @@ const (
 	DBPasswordEnv = "POSTGRES_PASSWORD" //nolint: gosec
 )
 
+// Redis env's names
+const (
+	RedisHostEnv              = "REDIS_HOST"
+	RedisPortEnv              = "REDIS_PORT"
+	RedisConnectionTimeoutEnv = "REDIS_CONNECTION_TIMEOUT_SEC"
+	RedisMaxIdleEnv           = "REDIS_MAX_IDLE"
+	RedisIdleTimeoutEnv       = "REDIS_IDLE_TIMEOUT_SEC"
+)
+
 // DB table and columns names
 const (
 	AuthTable = "auth"
@@ -31,4 +40,11 @@ const (
 	RoleColumn      = "role"
 	CreatedAtColumn = "created_at"
 	UpdatedAtColumn = "updated_at"
+)
+
+// Role const names
+const (
+	RoleUnknown = "UNKNOWN"
+	RoleUser    = "USER"
+	RoleAdmin   = "ADMIN"
 )

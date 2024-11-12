@@ -1,7 +1,7 @@
 package auth
 
 import (
-	db "github.com/MGomed/auth/pkg/client/db"
+	db "github.com/MGomed/common/pkg/client/db"
 )
 
 type repository struct {

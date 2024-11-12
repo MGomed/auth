@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MGomed/auth/consts"
-	errors "github.com/MGomed/auth/internal/config/errors"
+	consts "github.com/MGomed/auth/consts"
+	config_errors "github.com/MGomed/auth/internal/config/errors"
 )
 
 type pgConfig struct {
@@ -20,27 +20,27 @@ type pgConfig struct {
 func NewPgConfig() (*pgConfig, error) {
 	host := os.Getenv(consts.DBHostEnv)
 	if len(host) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBHostEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.DBHostEnv)
 	}
 
 	port := os.Getenv(consts.DBPortEnv)
 	if len(port) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBPortEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.DBPortEnv)
 	}
 
 	dbName := os.Getenv(consts.DBNameEnv)
 	if len(dbName) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBNameEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.DBNameEnv)
 	}
 
 	user := os.Getenv(consts.DBUserEnv)
 	if len(user) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBUserEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.DBUserEnv)
 	}
 
 	password := os.Getenv(consts.DBPasswordEnv)
 	if len(password) == 0 {
-		return nil, fmt.Errorf("%w: %v", errors.ErrEnvNotFound, consts.DBPasswordEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.DBPasswordEnv)
 	}
 
 	return &pgConfig{

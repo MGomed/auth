@@ -10,7 +10,7 @@ import (
 )
 
 // Update modifies user information
-func (s *API) Update(ctx context.Context, req *user_api.UpdateRequest) (*empty.Empty, error) {
+func (s *UserAPI) Update(ctx context.Context, req *user_api.UpdateRequest) (*empty.Empty, error) {
 	if err := validateName(req.User.Name.GetValue()); err != nil {
 		return nil, err
 	}

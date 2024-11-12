@@ -2,13 +2,15 @@ package model
 
 import (
 	"time"
+
+	"github.com/MGomed/auth/consts"
 )
 
 // RoleNames maps api.Role to its string representation
 var RoleNames = map[int32]string{
-	0: "UNKNOWN",
-	1: "USER",
-	2: "ADMIN",
+	0: consts.RoleUnknown,
+	1: consts.RoleUser,
+	2: consts.RoleAdmin,
 }
 
 // UserCreate represent api.UserCreate object

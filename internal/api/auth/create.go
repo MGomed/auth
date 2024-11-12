@@ -9,7 +9,7 @@ import (
 )
 
 // Create creates new user
-func (s *API) Create(ctx context.Context, req *user_api.CreateRequest) (*user_api.CreateResponse, error) {
+func (s *UserAPI) Create(ctx context.Context, req *user_api.CreateRequest) (*user_api.CreateResponse, error) {
 	if err := validateName(req.User.Name); err != nil {
 		return nil, err
 	}
@@ -22,10 +22,10 @@ func (s *API) Create(ctx context.Context, req *user_api.CreateRequest) (*user_ap
 		return nil, errors.ErrPasswordMismatch
 	}
 
-	resp, err := s.service.Create(ctx, converters.ToUserCreateFromAPI(req.User))
+	id, err := s.service.Create(ctx, converters.ToUserCreateFromAPI(req.User))
 	if err != nil {
 		return nil, err
 	}
 
-	return &user_api.CreateResponse{Id: resp}, nil
+	return &user_api.CreateResponse{Id: id}, nil
 }

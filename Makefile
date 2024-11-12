@@ -7,7 +7,15 @@ BUILD_DIR:=build
 lint:
 	$(LOCAL_BIN)/golangci-lint run ./... --config .golangci.pipeline.yaml
 
+.PHONY: test
+test:
+	mkdir -p out/coverage
+	go clean -testcache
+	go test -coverprofile out/coverage/cover.out ./...
+	go tool cover -html=out/coverage/cover.out -o out/coverage/coverage.html
+
 install-deps:
+	GOBIN=$(LOCAL_BIN) go install github.com/golang/mock/mockgen@v1.6.0
 	GOBIN=$(LOCAL_BIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
@@ -19,6 +27,10 @@ get-deps:
 
 generate:
 	make generate-user-api
+	make generate_mocks
+
+generate_mocks:
+	./generate.sh
 
 generate-user-api:
 	mkdir -p pkg/$(API)
@@ -30,7 +42,7 @@ generate-user-api:
 	api/$(API_PROTO)/*
 
 db-up:
-	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d pg migrator
+	docker compose -f ${BUILD_DIR}/docker-compose.yml up --build -d pg migrator redis
 
 db-down:
-	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator
+	docker compose -f ${BUILD_DIR}/docker-compose.yml down pg migrator redis

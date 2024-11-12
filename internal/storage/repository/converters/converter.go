@@ -1,8 +1,8 @@
-package model
+package converters
 
 import (
 	service_model "github.com/MGomed/auth/internal/model"
-	repo_model "github.com/MGomed/auth/internal/repository/model"
+	repo_model "github.com/MGomed/auth/internal/storage/repository/model"
 )
 
 // ToUserFromRepo converts repo_model.UserInfo to service_model.UserInfo
