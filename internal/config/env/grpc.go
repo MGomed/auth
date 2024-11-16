@@ -14,16 +14,16 @@ type grpcConfig struct {
 	port string
 }
 
-// NewAPIConfig is grpcConfig struct constructor
-func NewAPIConfig() (*grpcConfig, error) {
-	host := os.Getenv(consts.ServerHostEnv)
+// NewGRPCConfig is grpcConfig struct constructor
+func NewGRPCConfig() (*grpcConfig, error) {
+	host := os.Getenv(consts.GRPCServerHostEnv)
 	if len(host) == 0 {
-		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.ServerHostEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.GRPCServerHostEnv)
 	}
 
-	port := os.Getenv(consts.ServerPortEnv)
+	port := os.Getenv(consts.GRPCServerPortEnv)
 	if len(port) == 0 {
-		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.ServerPortEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.GRPCServerPortEnv)
 	}
 
 	return &grpcConfig{

@@ -29,7 +29,7 @@ func ToUserInfoFromService(user *service_model.UserInfo) *cache_model.UserInfo {
 }
 
 // ToUserInfoFromCache converts cache_model.UserInfo to service_model.UserInfo
-func ToUserInfoFromCache(user *cache_model.UserInfo) *service_model.UserInfo {
+func ToUserInfoFromCache(id int64, user *cache_model.UserInfo) *service_model.UserInfo {
 	if user == nil {
 		return nil
 	}
@@ -41,6 +41,7 @@ func ToUserInfoFromCache(user *cache_model.UserInfo) *service_model.UserInfo {
 	}
 
 	return &service_model.UserInfo{
+		ID:             id,
 		Name:           user.Name,
 		Email:          user.Email,
 		HashedPassword: user.Password,

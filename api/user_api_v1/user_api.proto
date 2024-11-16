@@ -5,14 +5,52 @@ package user_api;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/wrappers.proto";
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "github.com/MGomed/auth/pkg/user_api;user_api";
 
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    info: {
+      title: "Auth API"
+      version: "1.0.0"
+      contact: {
+        name: "MGomed"
+        email: "MGomed@mail.com"
+      };
+    };
+  
+    host: "localhost:8080",
+    schemes: HTTP,
+    schemes: HTTPS,
+    consumes: "application/json",
+    produces: "application/json",
+  };
+
 service UserAPI {
-    rpc Create (CreateRequest) returns (CreateResponse);
-    rpc Get (GetRequest) returns (GetResponse);
-    rpc Update (UpdateRequest) returns (google.protobuf.Empty);
-    rpc Delete (DeleteRequest) returns (google.protobuf.Empty);
+    rpc Create (CreateRequest) returns (CreateResponse) {
+        option (google.api.http) = {
+            post: "/auth/v1/create"
+            body: "user"
+        };
+    };
+    rpc Get (GetRequest) returns (GetResponse) {
+        option (google.api.http) = {
+            get: "/auth/v1/{id}"
+        };
+    };
+    rpc Update (UpdateRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            patch: "/auth/v1/{id}"
+            body: "user"
+        };
+    };
+    rpc Delete (DeleteRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/auth/v1/{id}"
+        };
+    };
 }
 
 enum Role {
@@ -22,11 +60,11 @@ enum Role {
 }
 
 message UserCreate {
-    string name             = 1;
-    string email            = 2;
-    string password         = 3;
-    string password_confirm = 4;
-    Role   role             = 5;
+    string name             = 1 [(validate.rules).string = {min_len: 2, max_len: 32}];
+    string email            = 2 [(validate.rules).string = {email: true}];
+    string password         = 3 [(validate.rules).string = {min_len: 8, max_len: 64}];
+    string password_confirm = 4 [(validate.rules).string = {min_len: 8, max_len: 64}];
+    Role   role             = 5 [(validate.rules).enum.defined_only = true];
 }
 
 message UserInfo {
@@ -39,13 +77,12 @@ message UserInfo {
 }
 
 message UserUpdate {
-    int64                       id    = 1;
-    google.protobuf.StringValue name  = 2;
-    Role                        role  = 3;
+    google.protobuf.StringValue name  = 1 [(validate.rules).string = {min_len: 2, max_len: 32}];
+    Role                        role  = 2 [(validate.rules).enum.defined_only = true];
 }
 
 message CreateRequest {
-    UserCreate user = 1;
+    UserCreate user = 1 [(validate.rules).message.required = true];
 }
 
 message CreateResponse {
@@ -53,7 +90,7 @@ message CreateResponse {
 }
 
 message GetRequest {
-    int64 id = 1;
+    int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message GetResponse {
@@ -61,9 +98,10 @@ message GetResponse {
 }
 
 message UpdateRequest {
-    UserUpdate user = 1;
+    int64      id   = 1 [(validate.rules).int64.gt = 0];
+    UserUpdate user = 2 [(validate.rules).message.required = true];
 }
 
 message DeleteRequest {
-    int64 id = 1;
+    int64 id = 1 [(validate.rules).int64.gt = 0];
 }

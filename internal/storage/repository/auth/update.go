@@ -13,7 +13,7 @@ import (
 )
 
 // UpdateUser updates a user in Postgres DB
-func (a *repository) UpdateUser(ctx context.Context, user *service_model.UserUpdate) (int64, error) {
+func (a *repository) UpdateUser(ctx context.Context, id int64, user *service_model.UserUpdate) (int64, error) {
 	builder := sq.Update(consts.AuthTable)
 
 	if user.Name != nil {
@@ -24,7 +24,7 @@ func (a *repository) UpdateUser(ctx context.Context, user *service_model.UserUpd
 		builder = builder.Set(consts.RoleColumn, user.Role)
 	}
 
-	builder = builder.Where(sq.Eq{consts.IDColumn: user.ID}).PlaceholderFormat(sq.Dollar)
+	builder = builder.Where(sq.Eq{consts.IDColumn: id}).PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builder.ToSql()
 	if err != nil {

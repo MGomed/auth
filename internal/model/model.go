@@ -34,7 +34,6 @@ type UserInfo struct {
 
 // UserUpdate represent api.UserUpdate object
 type UserUpdate struct {
-	ID   int64
 	Name *string
 	Role *string
 }

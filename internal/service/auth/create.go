@@ -4,6 +4,7 @@ import (
 	"context"
 
 	service_model "github.com/MGomed/auth/internal/model"
+	msg_bus_converters "github.com/MGomed/auth/internal/storage/message_bus/converters"
 )
 
 // Create creates new user
@@ -36,6 +37,15 @@ func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (i
 	}
 
 	if err := s.cache.CreateUser(ctx, id, userInfo); err != nil {
+		return 0, err
+	}
+
+	msg, err := msg_bus_converters.ToMessageTypeFromUserInfo(userInfo)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := s.msgBus.SendMessage(ctx, msg); err != nil {
 		return 0, err
 	}
 

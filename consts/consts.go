@@ -2,13 +2,28 @@ package consts
 
 import "time"
 
-// ContextTimeout is timeout for db connecting and server start
-const ContextTimeout = 15 * time.Second
-
-// Server env's names
+// Timeouts uses in project
 const (
-	ServerHostEnv = "SERVER_HOST"
-	ServerPortEnv = "SERVER_PORT"
+	ContextTimeout    = 30 * time.Second
+	ReadHeaderTimeout = 5 * time.Second
+)
+
+// GRPC Server env's names
+const (
+	GRPCServerHostEnv = "GRPC_HOST"
+	GRPCServerPortEnv = "GRPC_PORT"
+)
+
+// HTTP Server env's names
+const (
+	HTTPServerHostEnv = "HTTP_HOST"
+	HTTPServerPortEnv = "HTTP_PORT"
+)
+
+// Swagger Server env's names
+const (
+	SwaggerServerHostEnv = "SWAGGER_HOST"
+	SwaggerServerPortEnv = "SWAGGER_PORT"
 )
 
 // DB env's names
@@ -22,11 +37,11 @@ const (
 
 // Redis env's names
 const (
-	RedisHostEnv              = "REDIS_HOST"
-	RedisPortEnv              = "REDIS_PORT"
-	RedisConnectionTimeoutEnv = "REDIS_CONNECTION_TIMEOUT_SEC"
-	RedisMaxIdleEnv           = "REDIS_MAX_IDLE"
-	RedisIdleTimeoutEnv       = "REDIS_IDLE_TIMEOUT_SEC"
+	RedisHostEnv                 = "REDIS_HOST"
+	RedisPortEnv                 = "REDIS_PORT"
+	RedisConnectionTimeoutSecEnv = "REDIS_CONNECTION_TIMEOUT_SEC"
+	RedisMaxIdleEnv              = "REDIS_MAX_IDLE"
+	RedisIdleTimeoutSecEnv       = "REDIS_IDLE_TIMEOUT_SEC"
 )
 
 // DB table and columns names
@@ -47,4 +62,19 @@ const (
 	RoleUnknown = "UNKNOWN"
 	RoleUser    = "USER"
 	RoleAdmin   = "ADMIN"
+)
+
+// SwaggerPath declaires swagger json file path/url
+const SwaggerPath = "/api.swagger.json"
+
+// Kafka topic names
+const (
+	CreateTopic string = "create_topic"
+	DeleteTopic string = "delete_topic"
+)
+
+// Kafka env's names
+const (
+	KafkaBrokersEnvName = "KAFKA_BROKERS"
+	KafkaGroupIDEnvName = "KAFKA_GROUP_ID"
 )

@@ -117,7 +117,7 @@ func TestUpdate(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(nil)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
 
 		require.Equal(t, nil, err)
 	})
@@ -125,7 +125,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("Rainy case (failed to update user into database)", func(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(errTest)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
 		require.Equal(t, errTest, err)
 	})
 
@@ -133,7 +133,7 @@ func TestUpdate(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(errTest)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
 		require.Equal(t, errTest, err)
 	})
 }

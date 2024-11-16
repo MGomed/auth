@@ -33,9 +33,9 @@ func NewRedisConfig() (*redisConfig, error) {
 		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisPortEnv)
 	}
 
-	connectionTimeoutStr := os.Getenv(consts.RedisConnectionTimeoutEnv)
+	connectionTimeoutStr := os.Getenv(consts.RedisConnectionTimeoutSecEnv)
 	if len(connectionTimeoutStr) == 0 {
-		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisConnectionTimeoutEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisConnectionTimeoutSecEnv)
 	}
 
 	connectionTimeout, err := strconv.ParseInt(connectionTimeoutStr, 10, 64)
@@ -53,9 +53,9 @@ func NewRedisConfig() (*redisConfig, error) {
 		return nil, err
 	}
 
-	idleTimeoutStr := os.Getenv(consts.RedisIdleTimeoutEnv)
+	idleTimeoutStr := os.Getenv(consts.RedisIdleTimeoutSecEnv)
 	if len(idleTimeoutStr) == 0 {
-		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisIdleTimeoutEnv)
+		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisIdleTimeoutSecEnv)
 	}
 
 	idleTimeout, err := strconv.ParseInt(idleTimeoutStr, 10, 64)

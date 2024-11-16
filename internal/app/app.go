@@ -2,14 +2,30 @@ package app
 
 import (
 	"context"
+	"errors"
 	"flag"
+	"io"
+	"log"
 	"net"
+	"net/http"
+	"sync"
 
+	"github.com/IBM/sarama"
+	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	fs "github.com/rakyll/statik/fs"
+	cors "github.com/rs/cors"
 	grpc "google.golang.org/grpc"
+	insecure "google.golang.org/grpc/credentials/insecure"
 	reflection "google.golang.org/grpc/reflection"
 
+	consts "github.com/MGomed/auth/consts"
+	interceptors "github.com/MGomed/auth/internal/api/interceptors"
 	env_config "github.com/MGomed/auth/internal/config/env"
+	kafka_consumer "github.com/MGomed/auth/pkg/kafka/consumer"
 	user_api "github.com/MGomed/auth/pkg/user_api"
+
+	// Needed to get static files
+	_ "github.com/MGomed/auth/pkg/statik"
 	closer "github.com/MGomed/common/pkg/closer"
 )
 
@@ -17,8 +33,11 @@ var configPath string
 
 // App represents object for starting grpc server
 type App struct {
+	ctx             context.Context
 	serviceProvider *serviceProvider
-	server          *grpc.Server
+	grpcServer      *grpc.Server
+	httpServer      *http.Server
+	swaggerServer   *http.Server
 }
 
 // NewApp is App struct constructor
@@ -26,7 +45,9 @@ func NewApp(ctx context.Context) (*App, error) {
 	flag.StringVar(&configPath, "config-path", "build/.env", "path to config file")
 	flag.Parse()
 
-	app := &App{}
+	app := &App{
+		ctx: ctx,
+	}
 
 	if err := app.initDeps(ctx); err != nil {
 		return nil, err
@@ -42,7 +63,82 @@ func (a *App) Run() error {
 		closer.Wait()
 	}()
 
-	return a.runGRPCServer()
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		err := a.runGRPCServer()
+		if err != nil {
+			log.Fatalf("failed to run GRPC server: %v", err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		err := a.runHTTPServer()
+		if err != nil {
+			log.Fatalf("failed to run HTTP server: %v", err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		err := a.runSwaggerServer()
+		if err != nil {
+			log.Fatalf("failed to run Swagger server: %v", err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		consumerCreate := a.serviceProvider.Consumer()
+		closer.Add(consumerCreate.Close)
+
+		err := consumerCreate.Consume(a.ctx, consts.CreateTopic, kafka_consumer.Handler(
+			func(_ context.Context, msg *sarama.ConsumerMessage) error {
+				logger := a.serviceProvider.Logger()
+
+				logger.Printf("MESSAGE FROM KAFKA: >>> User created:\n%v\n", msg.Value)
+
+				log.Println("loggs")
+
+				return nil
+			}),
+		)
+
+		if err != nil {
+			log.Println(err.Error()) 
+		}
+	}()
+
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+
+	// 	consumerDelete := a.serviceProvider.Consumer()
+	// 	closer.Add(consumerDelete.Close)
+
+	// 	consumerDelete.Consume(a.ctx, consts.DeleteTopic, kafka_consumer.Handler(
+	// 		func(ctx context.Context, msg *sarama.ConsumerMessage) error {
+	// 			logger := a.serviceProvider.Logger()
+
+	// 			logger.Printf("MESSAGE FROM KAFKA: >>> User deleted:\n%v\n", msg.Value)
+
+	// 			return nil
+	// 		}),
+	// 	)
+	// }()
+
+	wg.Wait()
+
+	return nil
 }
 
 func (a *App) initDeps(ctx context.Context) error {
@@ -50,6 +146,8 @@ func (a *App) initDeps(ctx context.Context) error {
 		a.initConfig,
 		a.initServiceProvider,
 		a.initGRPCServer,
+		a.initHTTPServer,
+		a.initSwaggerServer,
 	}
 
 	for _, f := range inits {
@@ -76,25 +174,129 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
-	a.server = grpc.NewServer()
-	closer.Add(func() error {
-		a.server.Stop()
+	a.grpcServer = grpc.NewServer(
+		grpc.Creds(insecure.NewCredentials()),
+		grpc.UnaryInterceptor(interceptors.ValidateInterceptor),
+	)
 
-		return nil
+	reflection.Register(a.grpcServer)
+
+	user_api.RegisterUserAPIServer(a.grpcServer, a.serviceProvider.UserAPI(ctx))
+
+	return nil
+}
+
+func (a *App) initHTTPServer(ctx context.Context) error {
+	mux := runtime.NewServeMux()
+
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
+
+	err := user_api.RegisterUserAPIHandlerFromEndpoint(ctx, mux, a.serviceProvider.GRPCConfig().Address(), opts)
+	if err != nil {
+		return err
+	}
+
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Authorization"},
+		AllowCredentials: true,
 	})
 
-	reflection.Register(a.server)
+	a.httpServer = &http.Server{
+		Addr:              a.serviceProvider.HTTPConfig().Address(),
+		Handler:           corsMiddleware.Handler(mux),
+		ReadHeaderTimeout: consts.ReadHeaderTimeout,
+	}
 
-	user_api.RegisterUserAPIServer(a.server, a.serviceProvider.API(ctx))
+	return nil
+}
+
+func (a *App) initSwaggerServer(_ context.Context) error {
+	statikFs, err := fs.New()
+	if err != nil {
+		return err
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", http.StripPrefix("/", http.FileServer(statikFs)))
+	mux.HandleFunc(consts.SwaggerPath, serveSwaggerFile(consts.SwaggerPath))
+
+	a.swaggerServer = &http.Server{
+		Addr:              a.serviceProvider.SwaggerConfig().Address(),
+		Handler:           mux,
+		ReadHeaderTimeout: consts.ReadHeaderTimeout,
+	}
 
 	return nil
 }
 
 func (a *App) runGRPCServer() error {
-	lis, err := net.Listen("tcp", a.serviceProvider.APIConfig().Address())
+	lis, err := net.Listen("tcp", a.serviceProvider.GRPCConfig().Address())
 	if err != nil {
 		return err
 	}
+	closer.Add(func() error {
+		a.grpcServer.Stop()
 
-	return a.server.Serve(lis)
+		return nil
+	})
+
+	return a.grpcServer.Serve(lis)
+}
+
+func (a *App) runHTTPServer() error {
+	closer.Add(a.httpServer.Close)
+	if err := a.httpServer.ListenAndServe(); err != nil {
+		if !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a *App) runSwaggerServer() error {
+	closer.Add(a.swaggerServer.Close)
+	if err := a.swaggerServer.ListenAndServe(); err != nil {
+		if !errors.Is(err, http.ErrServerClosed) {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func serveSwaggerFile(path string) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		statikFs, err := fs.New()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		file, err := statikFs.Open(path)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer func() {
+			_ = file.Close()
+		}()
+
+		content, err := io.ReadAll(file)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		_, err = w.Write(content)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 }
