@@ -57,7 +57,7 @@ func TestCreate(t *testing.T) {
 			expectedID = int64(101)
 		)
 
-		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(expectedID, nil)
+		mockService.EXPECT().Create(gomock.Any(), converters.ToUserCreateFromAPI(user)).Return(expectedID, nil)
 
 		resp, err := api.Create(ctx, &user_api.CreateRequest{User: user})
 
@@ -75,7 +75,7 @@ func TestCreate(t *testing.T) {
 			}
 		)
 
-		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(int64(0), errTest)
+		mockService.EXPECT().Create(gomock.Any(), converters.ToUserCreateFromAPI(user)).Return(int64(0), errTest)
 
 		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
 
@@ -105,7 +105,7 @@ func TestDelete(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Delete(ctx, id).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), id).Return(nil)
 
 		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
 		require.Equal(t, nil, err)
@@ -116,7 +116,7 @@ func TestDelete(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Delete(ctx, id).Return(errTest)
+		mockService.EXPECT().Delete(gomock.Any(), id).Return(errTest)
 
 		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
 		require.Equal(t, errTest, err)
@@ -131,7 +131,7 @@ func TestGet(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Get(ctx, id).Return(nil, nil)
+		mockService.EXPECT().Get(gomock.Any(), id).Return(nil, nil)
 
 		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
 		require.Equal(t, nil, err)
@@ -142,7 +142,7 @@ func TestGet(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Get(ctx, id).Return(nil, errTest)
+		mockService.EXPECT().Get(gomock.Any(), id).Return(nil, errTest)
 
 		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
 		require.Equal(t, errTest, err)
@@ -162,7 +162,7 @@ func TestUpdate(t *testing.T) {
 			}
 		)
 
-		mockService.EXPECT().Update(ctx, id, converters.ToUserUpdateFromAPI(user)).Return(nil)
+		mockService.EXPECT().Update(gomock.Any(), id, converters.ToUserUpdateFromAPI(user)).Return(nil)
 
 		_, err := api.Update(ctx, &user_api.UpdateRequest{Id: id, User: user})
 		require.Equal(t, nil, err)
@@ -179,7 +179,7 @@ func TestUpdate(t *testing.T) {
 			}
 		)
 
-		mockService.EXPECT().Update(ctx, id, converters.ToUserUpdateFromAPI(user)).Return(errTest)
+		mockService.EXPECT().Update(gomock.Any(), id, converters.ToUserUpdateFromAPI(user)).Return(errTest)
 
 		_, err := api.Update(ctx, &user_api.UpdateRequest{Id: id, User: user})
 		require.Equal(t, errTest, err)
