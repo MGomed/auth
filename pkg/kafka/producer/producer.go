@@ -31,7 +31,7 @@ func NewProducer(logger *log.Logger, brokers []string) (*producer, error) {
 }
 
 // Produce produces message to topic
-func (p *producer) Produce(ctx context.Context, topic string, data []byte) error {
+func (p *producer) Produce(_ context.Context, topic string, data []byte) error {
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(data),

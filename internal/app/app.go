@@ -107,34 +107,36 @@ func (a *App) Run() error {
 
 				logger.Printf("MESSAGE FROM KAFKA: >>> User created:\n%v\n", msg.Value)
 
-				log.Println("loggs")
+				return nil
+			}),
+		)
+
+		if err != nil {
+			a.serviceProvider.Logger().Println("consumer error: ", err)
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		consumerDelete := a.serviceProvider.Consumer()
+		closer.Add(consumerDelete.Close)
+
+		err := consumerDelete.Consume(a.ctx, consts.DeleteTopic, kafka_consumer.Handler(
+			func(_ context.Context, msg *sarama.ConsumerMessage) error {
+				logger := a.serviceProvider.Logger()
+
+				logger.Printf("MESSAGE FROM KAFKA: >>> User deleted:\n%v\n", msg.Value)
 
 				return nil
 			}),
 		)
 
 		if err != nil {
-			log.Println(err.Error()) 
+			a.serviceProvider.Logger().Println("consumer error: ", err)
 		}
 	}()
-
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
-
-	// 	consumerDelete := a.serviceProvider.Consumer()
-	// 	closer.Add(consumerDelete.Close)
-
-	// 	consumerDelete.Consume(a.ctx, consts.DeleteTopic, kafka_consumer.Handler(
-	// 		func(ctx context.Context, msg *sarama.ConsumerMessage) error {
-	// 			logger := a.serviceProvider.Logger()
-
-	// 			logger.Printf("MESSAGE FROM KAFKA: >>> User deleted:\n%v\n", msg.Value)
-
-	// 			return nil
-	// 		}),
-	// 	)
-	// }()
 
 	wg.Wait()
 

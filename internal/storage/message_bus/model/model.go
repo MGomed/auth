@@ -15,6 +15,7 @@ const (
 	DeleteType MessageType = "delete"
 )
 
+// MessageTypeToTopic maps type of message to topic which message should be sent
 var MessageTypeToTopic = map[MessageType]string{
 	CreateType: consts.CreateTopic,
 	DeleteType: consts.DeleteTopic,
@@ -28,9 +29,9 @@ type Message struct {
 
 // UserInfo fro MessageBus
 type UserInfo struct {
-	ID        int64      `json:"id"`
-	Name      string     `json:"name"`
-	Email     string     `json:"email"`
-	Role      string     `json:"role"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }

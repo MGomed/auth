@@ -15,10 +15,9 @@ type redisConfig struct {
 	host string
 	port string
 
-	connectionTimeout time.Duration
-
-	maxIdle     int
-	idleTimeout time.Duration
+	connectionTimeoutSecond time.Duration
+	maxIdle                 int
+	idleTimeoutSecond       time.Duration
 }
 
 // NewRedisConfig is redisConfig struct constructor
@@ -33,12 +32,12 @@ func NewRedisConfig() (*redisConfig, error) {
 		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisPortEnv)
 	}
 
-	connectionTimeoutStr := os.Getenv(consts.RedisConnectionTimeoutSecEnv)
-	if len(connectionTimeoutStr) == 0 {
+	connectionTimeoutSecStr := os.Getenv(consts.RedisConnectionTimeoutSecEnv)
+	if len(connectionTimeoutSecStr) == 0 {
 		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisConnectionTimeoutSecEnv)
 	}
 
-	connectionTimeout, err := strconv.ParseInt(connectionTimeoutStr, 10, 64)
+	connectionTimeoutSec, err := strconv.ParseInt(connectionTimeoutSecStr, 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -53,22 +52,22 @@ func NewRedisConfig() (*redisConfig, error) {
 		return nil, err
 	}
 
-	idleTimeoutStr := os.Getenv(consts.RedisIdleTimeoutSecEnv)
-	if len(idleTimeoutStr) == 0 {
+	idleTimeoutSecStr := os.Getenv(consts.RedisIdleTimeoutSecEnv)
+	if len(idleTimeoutSecStr) == 0 {
 		return nil, fmt.Errorf("%w: %v", config_errors.ErrEnvNotFound, consts.RedisIdleTimeoutSecEnv)
 	}
 
-	idleTimeout, err := strconv.ParseInt(idleTimeoutStr, 10, 64)
+	idleTimeoutSec, err := strconv.ParseInt(idleTimeoutSecStr, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	return &redisConfig{
-		host:              host,
-		port:              port,
-		connectionTimeout: time.Duration(connectionTimeout) * time.Second,
-		maxIdle:           maxIdle,
-		idleTimeout:       time.Duration(idleTimeout) * time.Second,
+		host:                    host,
+		port:                    port,
+		connectionTimeoutSecond: time.Duration(connectionTimeoutSec) * time.Second,
+		maxIdle:                 maxIdle,
+		idleTimeoutSecond:       time.Duration(idleTimeoutSec) * time.Second,
 	}, nil
 }
 
@@ -77,7 +76,7 @@ func (cfg *redisConfig) Address() string {
 }
 
 func (cfg *redisConfig) ConnectionTimeout() time.Duration {
-	return cfg.connectionTimeout
+	return cfg.connectionTimeoutSecond
 }
 
 func (cfg *redisConfig) MaxIdle() int {
@@ -85,5 +84,5 @@ func (cfg *redisConfig) MaxIdle() int {
 }
 
 func (cfg *redisConfig) IdleTimeout() time.Duration {
-	return cfg.idleTimeout
+	return cfg.idleTimeoutSecond
 }

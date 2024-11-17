@@ -24,6 +24,7 @@ type Cache interface {
 	DeleteUser(ctx context.Context, id int64) error
 }
 
+// MessageBus declaired interface for sending messages to message brokers
 type MessageBus interface {
 	SendMessage(ctx context.Context, msg *msg_bus_model.Message) error
 }

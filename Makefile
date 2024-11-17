@@ -28,8 +28,6 @@ install-deps:
 get-deps:
 	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/protobuf/cmd/protoc-gen-go
 	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	GOBIN=$(LOCAL_BIN) go get -u github.com/envoyproxy/protoc-gen-validate/validate
-	GOBIN=$(LOCAL_BIN) go get -u github.com/grpc-ecosystem/grpc-gateway/v2/runtime
 
 generate:
 	make generate-user-api
