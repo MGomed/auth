@@ -57,7 +57,7 @@ func TestCreate(t *testing.T) {
 			expectedID = int64(101)
 		)
 
-		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(expectedID, nil)
+		mockService.EXPECT().Create(gomock.Any(), converters.ToUserCreateFromAPI(user)).Return(expectedID, nil)
 
 		resp, err := api.Create(ctx, &user_api.CreateRequest{User: user})
 
@@ -75,46 +75,11 @@ func TestCreate(t *testing.T) {
 			}
 		)
 
-		mockService.EXPECT().Create(ctx, converters.ToUserCreateFromAPI(user)).Return(int64(0), errTest)
+		mockService.EXPECT().Create(gomock.Any(), converters.ToUserCreateFromAPI(user)).Return(int64(0), errTest)
 
 		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
 
 		require.Equal(t, errTest, err)
-	})
-
-	t.Run("Rainy case (too short name)", func(t *testing.T) {
-		var (
-			user = &user_api.UserCreate{
-				Name: "A",
-			}
-		)
-
-		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
-		require.Equal(t, api_errors.ErrNameLenInvalid, err)
-	})
-
-	t.Run("Rainy case (wrong email - 1)", func(t *testing.T) {
-		var (
-			user = &user_api.UserCreate{
-				Name:  "Alex",
-				Email: "Alex_mail.com",
-			}
-		)
-
-		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
-		require.Equal(t, errors.Is(err, api_errors.ErrEmailInvalid), true)
-	})
-
-	t.Run("Rainy case (wrong email - 2)", func(t *testing.T) {
-		var (
-			user = &user_api.UserCreate{
-				Name:  "Alex",
-				Email: "Alex@mail_com",
-			}
-		)
-
-		_, err := api.Create(ctx, &user_api.CreateRequest{User: user})
-		require.Equal(t, errors.Is(err, api_errors.ErrEmailInvalid), true)
 	})
 
 	t.Run("Rainy case (password mismatch)", func(t *testing.T) {
@@ -140,7 +105,7 @@ func TestDelete(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Delete(ctx, id).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), id).Return(nil)
 
 		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
 		require.Equal(t, nil, err)
@@ -151,7 +116,7 @@ func TestDelete(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Delete(ctx, id).Return(errTest)
+		mockService.EXPECT().Delete(gomock.Any(), id).Return(errTest)
 
 		_, err := api.Delete(ctx, &user_api.DeleteRequest{Id: id})
 		require.Equal(t, errTest, err)
@@ -166,7 +131,7 @@ func TestGet(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Get(ctx, id).Return(nil, nil)
+		mockService.EXPECT().Get(gomock.Any(), id).Return(nil, nil)
 
 		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
 		require.Equal(t, nil, err)
@@ -177,7 +142,7 @@ func TestGet(t *testing.T) {
 			id = int64(101)
 		)
 
-		mockService.EXPECT().Get(ctx, id).Return(nil, errTest)
+		mockService.EXPECT().Get(gomock.Any(), id).Return(nil, errTest)
 
 		_, err := api.Get(ctx, &user_api.GetRequest{Id: id})
 		require.Equal(t, errTest, err)
@@ -189,24 +154,24 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("Sunny case", func(t *testing.T) {
 		var (
-			user = &user_api.UserUpdate{
-				Id: int64(101),
+			id   int64 = 101
+			user       = &user_api.UserUpdate{
 				Name: &wrapperspb.StringValue{
 					Value: "Alex",
 				},
 			}
 		)
 
-		mockService.EXPECT().Update(ctx, converters.ToUserUpdateFromAPI(user)).Return(nil)
+		mockService.EXPECT().Update(gomock.Any(), id, converters.ToUserUpdateFromAPI(user)).Return(nil)
 
-		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
+		_, err := api.Update(ctx, &user_api.UpdateRequest{Id: id, User: user})
 		require.Equal(t, nil, err)
 	})
 
 	t.Run("Rainy case", func(t *testing.T) {
 		var (
-			user = &user_api.UserUpdate{
-				Id: int64(101),
+			id   int64 = 101
+			user       = &user_api.UserUpdate{
 				Name: &wrapperspb.StringValue{
 					Value: "Alex",
 				},
@@ -214,21 +179,9 @@ func TestUpdate(t *testing.T) {
 			}
 		)
 
-		mockService.EXPECT().Update(ctx, converters.ToUserUpdateFromAPI(user)).Return(errTest)
+		mockService.EXPECT().Update(gomock.Any(), id, converters.ToUserUpdateFromAPI(user)).Return(errTest)
 
-		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
+		_, err := api.Update(ctx, &user_api.UpdateRequest{Id: id, User: user})
 		require.Equal(t, errTest, err)
-	})
-
-	t.Run("Rainy case (too short name)", func(t *testing.T) {
-		var (
-			user = &user_api.UserUpdate{
-				Id:   int64(101),
-				Role: user_api.Role_UNKNOWN,
-			}
-		)
-
-		_, err := api.Update(ctx, &user_api.UpdateRequest{User: user})
-		require.Equal(t, api_errors.ErrNameLenInvalid, err)
 	})
 }

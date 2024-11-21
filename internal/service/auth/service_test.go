@@ -25,6 +25,7 @@ var (
 	mockRepo     *storage_mock.MockRepository
 	mockCache    *storage_mock.MockCache
 	mockTxMnager *db_mock.MockTxManager
+	mockMsgBus   *storage_mock.MockMessageBus
 
 	serv *service
 
@@ -39,12 +40,14 @@ func BeforeSuite(t *testing.T) {
 	mockRepo = storage_mock.NewMockRepository(ctl)
 	mockCache = storage_mock.NewMockCache(ctl)
 	mockTxMnager = db_mock.NewMockTxManager(ctl)
+	mockMsgBus = storage_mock.NewMockMessageBus(ctl)
 
 	serv = &service{
 		logger:    logger,
 		repo:      mockRepo,
 		cache:     mockCache,
 		txManager: mockTxMnager,
+		msgBus:    mockMsgBus,
 	}
 
 	t.Cleanup(ctl.Finish)
@@ -56,6 +59,7 @@ func TestCreate(t *testing.T) {
 	t.Run("Sunny case", func(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(nil)
+		mockMsgBus.EXPECT().SendMessage(ctx, gomock.Any()).Return(nil)
 
 		_, err := serv.Create(ctx, &service_model.UserCreate{})
 		require.Equal(t, nil, err)
@@ -65,7 +69,7 @@ func TestCreate(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(errTest)
 
 		_, err := serv.Create(ctx, &service_model.UserCreate{})
-		require.Equal(t, errTest, err)
+		require.ErrorIs(t, err, errTest)
 	})
 
 	t.Run("Rainy case (failed to add user into cache)", func(t *testing.T) {
@@ -73,7 +77,16 @@ func TestCreate(t *testing.T) {
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(errTest)
 
 		_, err := serv.Create(ctx, &service_model.UserCreate{})
-		require.Equal(t, errTest, err)
+		require.ErrorIs(t, err, errTest)
+	})
+
+	t.Run("Rainy case (failed send message to message bus)", func(t *testing.T) {
+		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
+		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(nil)
+		mockMsgBus.EXPECT().SendMessage(ctx, gomock.Any()).Return(errTest)
+
+		_, err := serv.Create(ctx, &service_model.UserCreate{})
+		require.ErrorIs(t, err, errTest)
 	})
 }
 
@@ -106,7 +119,7 @@ func TestGet(t *testing.T) {
 		mockRepo.EXPECT().GetUser(ctx, id).Return(nil, errTest)
 
 		_, err := serv.Get(ctx, id)
-		require.Equal(t, errTest, err)
+		require.ErrorIs(t, err, errTest)
 	})
 }
 
@@ -117,7 +130,7 @@ func TestUpdate(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(nil)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
 
 		require.Equal(t, nil, err)
 	})
@@ -125,16 +138,16 @@ func TestUpdate(t *testing.T) {
 	t.Run("Rainy case (failed to update user into database)", func(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(errTest)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
-		require.Equal(t, errTest, err)
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
+		require.ErrorIs(t, err, errTest)
 	})
 
 	t.Run("Rainy case (failed to update user into cache)", func(t *testing.T) {
 		mockTxMnager.EXPECT().ReadCommitted(ctx, gomock.Any()).Return(nil)
 		mockCache.EXPECT().CreateUser(ctx, gomock.Any(), gomock.Any()).Return(errTest)
 
-		err := serv.Update(ctx, &service_model.UserUpdate{})
-		require.Equal(t, errTest, err)
+		err := serv.Update(ctx, 0, &service_model.UserUpdate{})
+		require.ErrorIs(t, err, errTest)
 	})
 }
 
@@ -146,6 +159,7 @@ func TestDelete(t *testing.T) {
 
 		mockRepo.EXPECT().DeleteUser(ctx, id).Return(int64(0), nil)
 		mockCache.EXPECT().DeleteUser(ctx, id).Return(nil)
+		mockMsgBus.EXPECT().SendMessage(ctx, gomock.Any()).Return(nil)
 
 		err := serv.Delete(ctx, id)
 		require.Equal(t, nil, err)
@@ -156,6 +170,7 @@ func TestDelete(t *testing.T) {
 
 		mockRepo.EXPECT().DeleteUser(ctx, id).Return(int64(0), nil)
 		mockCache.EXPECT().DeleteUser(ctx, id).Return(cache_errors.ErrUserNotPresent)
+		mockMsgBus.EXPECT().SendMessage(ctx, gomock.Any()).Return(nil)
 
 		err := serv.Delete(ctx, id)
 		require.Equal(t, nil, err)
@@ -167,7 +182,7 @@ func TestDelete(t *testing.T) {
 		mockRepo.EXPECT().DeleteUser(ctx, id).Return(int64(0), errTest)
 
 		err := serv.Delete(ctx, id)
-		require.Equal(t, errTest, err)
+		require.ErrorIs(t, err, errTest)
 	})
 
 	t.Run("Rainy case (failed to delete user from cache)", func(t *testing.T) {
@@ -177,6 +192,17 @@ func TestDelete(t *testing.T) {
 		mockCache.EXPECT().DeleteUser(ctx, id).Return(errTest)
 
 		err := serv.Delete(ctx, id)
-		require.Equal(t, errTest, err)
+		require.ErrorIs(t, err, errTest)
+	})
+
+	t.Run("Rainy case (failed send message to message bus)", func(t *testing.T) {
+		var id int64 = 101
+
+		mockRepo.EXPECT().DeleteUser(ctx, id).Return(int64(0), nil)
+		mockCache.EXPECT().DeleteUser(ctx, id).Return(nil)
+		mockMsgBus.EXPECT().SendMessage(ctx, gomock.Any()).Return(errTest)
+
+		err := serv.Delete(ctx, id)
+		require.ErrorIs(t, err, errTest)
 	})
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	cache_errors "github.com/MGomed/auth/internal/storage/cache/errors"
+	msg_bus_converters "github.com/MGomed/auth/internal/storage/message_bus/converters"
 )
 
 // Delete removes user by id
@@ -23,6 +24,15 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 	}
 
 	s.logger.Printf("Successfully deleted user: %v", id)
+
+	msg, err := msg_bus_converters.ToMessageTypeFromID(id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.msgBus.SendMessage(ctx, msg); err != nil {
+		return err
+	}
 
 	return nil
 }

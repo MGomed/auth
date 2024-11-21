@@ -23,5 +23,5 @@ func (c *cacher) GetUser(ctx context.Context, id int64) (*service_model.UserInfo
 		return nil, fmt.Errorf("%w: %v", cache_errors.ErrUserNotPresent, id)
 	}
 
-	return cache_converters.ToUserInfoFromCache(user), nil
+	return cache_converters.ToUserInfoFromCache(id, user), nil
 }

@@ -12,6 +12,7 @@ type service struct {
 	repo      storage.Repository
 	cache     storage.Cache
 	txManager db.TxManager
+	msgBus    storage.MessageBus
 }
 
 // NewService is a service constructor
@@ -20,11 +21,13 @@ func NewService(
 	repo storage.Repository,
 	cache storage.Cache,
 	txManager db.TxManager,
+	msgBus storage.MessageBus,
 ) *service {
 	return &service{
 		logger:    logger,
 		repo:      repo,
 		cache:     cache,
 		txManager: txManager,
+		msgBus:    msgBus,
 	}
 }

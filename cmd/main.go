@@ -4,13 +4,11 @@ import (
 	"context"
 	"log"
 
-	consts "github.com/MGomed/auth/consts"
 	app "github.com/MGomed/auth/internal/app"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), consts.ContextTimeout)
-	defer cancel()
+	ctx := context.Background()
 
 	app, err := app.NewApp(ctx)
 	if err != nil {

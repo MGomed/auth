@@ -3,12 +3,16 @@ package auth
 import (
 	"context"
 
+	consts "github.com/MGomed/auth/consts"
 	converters "github.com/MGomed/auth/internal/converters"
 	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 
 // Get gets user by id
 func (s *UserAPI) Get(ctx context.Context, req *user_api.GetRequest) (*user_api.GetResponse, error) {
+	ctx, cancel := context.WithTimeout(ctx, consts.ContextTimeout)
+	defer cancel()
+
 	resp, err := s.service.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err

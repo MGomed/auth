@@ -1,9 +1,10 @@
 package converters
 
 import (
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+
 	service_model "github.com/MGomed/auth/internal/model"
 	api "github.com/MGomed/auth/pkg/user_api"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ToUserInfoFromService converts UserInfo to api.UserInfo
@@ -48,8 +49,6 @@ func ToUserUpdateFromAPI(user *api.UserUpdate) *service_model.UserUpdate {
 	}
 
 	var res service_model.UserUpdate
-
-	res.ID = user.Id
 
 	if val := user.Name.GetValue(); val != "" {
 		res.Name = &val

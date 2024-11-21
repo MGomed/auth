@@ -160,7 +160,6 @@ func TestUpdate(t *testing.T) {
 			role       = service_model.RoleNames[1]
 
 			user = &service_model.UserUpdate{
-				ID:   id,
 				Name: &name,
 				Role: &role,
 			}
@@ -169,7 +168,7 @@ func TestUpdate(t *testing.T) {
 		mockDBC.EXPECT().DB().Return(mockDB)
 		mockDB.EXPECT().Exec(ctx, gomock.Any(), gomock.Any()).Return(pgconn.CommandTag{}, nil)
 
-		_, err := repo.UpdateUser(ctx, user)
+		_, err := repo.UpdateUser(ctx, id, user)
 		require.Equal(t, nil, err)
 	})
 
@@ -180,7 +179,6 @@ func TestUpdate(t *testing.T) {
 			role       = service_model.RoleNames[1]
 
 			user = &service_model.UserUpdate{
-				ID:   id,
 				Name: &name,
 				Role: &role,
 			}
@@ -189,7 +187,7 @@ func TestUpdate(t *testing.T) {
 		mockDBC.EXPECT().DB().Return(mockDB)
 		mockDB.EXPECT().Exec(ctx, gomock.Any(), gomock.Any()).Return(pgconn.CommandTag{}, errTest)
 
-		_, err := repo.UpdateUser(ctx, user)
+		_, err := repo.UpdateUser(ctx, id, user)
 		require.Equal(t, errors.Is(err, repo_errors.ErrQueryExecute), true)
 	})
 
@@ -197,12 +195,10 @@ func TestUpdate(t *testing.T) {
 		var (
 			id int64 = 101
 
-			user = &service_model.UserUpdate{
-				ID: id,
-			}
+			user = &service_model.UserUpdate{}
 		)
 
-		_, err := repo.UpdateUser(ctx, user)
+		_, err := repo.UpdateUser(ctx, id, user)
 		require.Equal(t, err != nil, true)
 	})
 }

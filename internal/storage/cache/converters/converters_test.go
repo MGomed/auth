@@ -13,9 +13,9 @@ import (
 func TestToUserInfoFromCache(t *testing.T) {
 	t.Run("Sunny case", func(t *testing.T) {
 		var (
-			now = time.Now()
-
-			info = cache_model.UserInfo{
+			now        = time.Now()
+			id   int64 = 101
+			info       = cache_model.UserInfo{
 				Name:      "Alex",
 				Email:     "Alex@main.com",
 				CreatedAt: now.UnixNano(),
@@ -23,7 +23,8 @@ func TestToUserInfoFromCache(t *testing.T) {
 			}
 		)
 
-		user := ToUserInfoFromCache(&info)
+		user := ToUserInfoFromCache(id, &info)
+		assert.Equal(t, id, user.ID)
 		assert.Equal(t, info.Name, user.Name)
 		assert.Equal(t, info.Email, user.Email)
 		assert.Equal(t, info.CreatedAt, user.CreatedAt.UnixNano())
@@ -31,9 +32,12 @@ func TestToUserInfoFromCache(t *testing.T) {
 	})
 
 	t.Run("Rainy case", func(t *testing.T) {
-		var info *cache_model.UserInfo
+		var (
+			id   int64 = 101
+			info *cache_model.UserInfo
+		)
 
-		user := ToUserInfoFromCache(info)
+		user := ToUserInfoFromCache(id, info)
 		assert.Equal(t, user == nil, true)
 	})
 }
