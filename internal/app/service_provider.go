@@ -3,14 +3,20 @@ package app
 import (
 	"context"
 	"log"
+	"os"
 
 	sarama "github.com/IBM/sarama"
 
-	auth_api "github.com/MGomed/auth/internal/api/auth"
+	consts "github.com/MGomed/auth/consts"
+	access_api_impl "github.com/MGomed/auth/internal/api/access_api_impl"
+	auth_api_impl "github.com/MGomed/auth/internal/api/auth_api_impl"
+	user_api_impl "github.com/MGomed/auth/internal/api/user_api_impl"
 	config "github.com/MGomed/auth/internal/config"
 	env_config "github.com/MGomed/auth/internal/config/env"
 	service "github.com/MGomed/auth/internal/service"
-	auth_service "github.com/MGomed/auth/internal/service/auth"
+	accessservice "github.com/MGomed/auth/internal/service/access_service"
+	auth_service "github.com/MGomed/auth/internal/service/auth_service"
+	user_service "github.com/MGomed/auth/internal/service/user_service"
 	storage "github.com/MGomed/auth/internal/storage"
 	auth_cache "github.com/MGomed/auth/internal/storage/cache/auth"
 	msg_bus_auth "github.com/MGomed/auth/internal/storage/message_bus/auth"
@@ -18,17 +24,20 @@ import (
 	kafka "github.com/MGomed/auth/pkg/kafka"
 	kafka_consumer "github.com/MGomed/auth/pkg/kafka/consumer"
 	kafka_producer "github.com/MGomed/auth/pkg/kafka/producer"
-	cache "github.com/MGomed/common/pkg/client/cache"
-	redis "github.com/MGomed/common/pkg/client/cache/redis"
-	db "github.com/MGomed/common/pkg/client/db"
-	pg "github.com/MGomed/common/pkg/client/db/pg"
-	transaction "github.com/MGomed/common/pkg/client/db/transaction"
-	closer "github.com/MGomed/common/pkg/closer"
-	logger "github.com/MGomed/common/pkg/logger"
+	cache "github.com/MGomed/common/client/cache"
+	redis "github.com/MGomed/common/client/cache/redis"
+	db "github.com/MGomed/common/client/db"
+	pg "github.com/MGomed/common/client/db/pg"
+	transaction "github.com/MGomed/common/client/db/transaction"
+	closer "github.com/MGomed/common/closer"
+	logger "github.com/MGomed/common/logger"
 	go_redis "github.com/gomodule/redigo/redis"
 )
 
 type serviceProvider struct {
+	refreshSecretKey []byte
+	accessSecretKey  []byte
+
 	logger *log.Logger
 
 	pgConfig      config.PgConfig
@@ -37,6 +46,7 @@ type serviceProvider struct {
 	httpConfig    config.HTTPConfig
 	swaggerConfig config.SwaggerConfig
 	kafkaConfig   config.KafkaConfig
+	jwtConfig     config.JWTConfig
 
 	dbc         db.Client
 	redisClient cache.RedisClient
@@ -47,13 +57,45 @@ type serviceProvider struct {
 	repo   storage.Repository
 	msgBus storage.MessageBus
 
-	service service.Service
+	userService   service.UserService
+	authService   service.AuthService
+	accessService service.AccessService
 
-	userAPI *auth_api.UserAPI
+	userAPI   *user_api_impl.UserAPI
+	authAPI   *auth_api_impl.AuthAPI
+	accessAPI *access_api_impl.AccessAPI
 }
 
 func newServiceProvider() *serviceProvider {
 	return &serviceProvider{}
+}
+
+// RefreshSecretKey init/get secret key refresh token
+func (p *serviceProvider) RefreshSecretKey() []byte {
+	if len(p.refreshSecretKey) == 0 {
+		key, err := os.ReadFile(consts.RefreshSecretKeyPath)
+		if err != nil {
+			log.Fatalf("couldn't read refresh secret key: %v", err)
+		}
+
+		p.refreshSecretKey = key
+	}
+
+	return p.refreshSecretKey
+}
+
+// AccessSecretKey init/get secret key access token
+func (p *serviceProvider) AccessSecretKey() []byte {
+	if len(p.accessSecretKey) == 0 {
+		key, err := os.ReadFile(consts.AccessSecretKeyPath)
+		if err != nil {
+			log.Fatalf("couldn't read access secret key: %v", err)
+		}
+
+		p.accessSecretKey = key
+	}
+
+	return p.accessSecretKey
 }
 
 // PgConfig init/get postgres config
@@ -140,10 +182,24 @@ func (p *serviceProvider) KafkaConfig() config.KafkaConfig {
 	return p.kafkaConfig
 }
 
+// JWTConfig init/get jwt config
+func (p *serviceProvider) JWTConfig() config.JWTConfig {
+	if p.jwtConfig == nil {
+		cfg, err := env_config.NewJWTConfig()
+		if err != nil {
+			log.Fatalf("failed to create jwt config: %v", err)
+		}
+
+		p.jwtConfig = cfg
+	}
+
+	return p.jwtConfig
+}
+
 // Logger init/get logger
 func (p *serviceProvider) Logger() *log.Logger {
 	if p.logger == nil {
-		p.logger = logger.InitLogger()
+		p.logger = logger.InitLogger(consts.ServiceName)
 	}
 
 	return p.logger
@@ -197,7 +253,7 @@ func (p *serviceProvider) Producer(_ context.Context) kafka.Producer {
 	if p.producer == nil {
 		producer, err := kafka_producer.NewProducer(p.Logger(), p.KafkaConfig().Brokers())
 		if err != nil {
-			log.Fatalf("failed to create kafka producer: %e", err)
+			log.Fatalf("failed to create kafka producer: %v", err)
 		}
 
 		p.producer = producer
@@ -260,10 +316,10 @@ func (p *serviceProvider) MessageBus(ctx context.Context) storage.MessageBus {
 	return p.msgBus
 }
 
-// Service init/get Service(usecases)
-func (p *serviceProvider) Service(ctx context.Context) service.Service {
-	if p.service == nil {
-		p.service = auth_service.NewService(
+// UserService init/get UserService(usecases)
+func (p *serviceProvider) UserService(ctx context.Context) service.UserService {
+	if p.userService == nil {
+		p.userService = user_service.NewUserService(
 			p.Logger(),
 			p.Repository(ctx),
 			p.Cache(ctx),
@@ -272,14 +328,64 @@ func (p *serviceProvider) Service(ctx context.Context) service.Service {
 		)
 	}
 
-	return p.service
+	return p.userService
+}
+
+// AuthService init/get AuthService(usecases)
+func (p *serviceProvider) AuthService(ctx context.Context) service.AuthService {
+	if p.authService == nil {
+		p.authService = auth_service.NewAuthService(
+			p.Logger(),
+			p.Repository(ctx),
+		)
+	}
+
+	return p.authService
+}
+
+// AccessService init/get AccessService(usecases)
+func (p *serviceProvider) AccessService() service.AccessService {
+	if p.accessService == nil {
+		p.accessService = accessservice.NewAccessService(p.Logger())
+	}
+
+	return p.accessService
 }
 
 // UserAPI init/get UserAPI(grpc implementation)
-func (p *serviceProvider) UserAPI(ctx context.Context) *auth_api.UserAPI {
+func (p *serviceProvider) UserAPI(ctx context.Context) *user_api_impl.UserAPI {
 	if p.userAPI == nil {
-		p.userAPI = auth_api.NewUserAPI(p.Logger(), p.Service(ctx))
+		p.userAPI = user_api_impl.NewUserAPI(p.Logger(), p.UserService(ctx))
 	}
 
 	return p.userAPI
+}
+
+// AuthAPI init/get AuthAPI(grpc implementation)
+func (p *serviceProvider) AuthAPI(ctx context.Context) *auth_api_impl.AuthAPI {
+	if p.authAPI == nil {
+		p.authAPI = auth_api_impl.NewAuthAPI(
+			p.Logger(),
+			p.JWTConfig().GetRefreshTokenExpirationTimeMin(),
+			p.JWTConfig().GetAccessTokenExpirationTimeMin(),
+			p.RefreshSecretKey(),
+			p.AccessSecretKey(),
+			p.AuthService(ctx),
+		)
+	}
+
+	return p.authAPI
+}
+
+// AccessAPI init/get AccessAPI(grpc implementation)
+func (p *serviceProvider) AccessAPI() *access_api_impl.AccessAPI {
+	if p.accessAPI == nil {
+		p.accessAPI = access_api_impl.NewAccessAPI(
+			p.Logger(),
+			p.AccessSecretKey(),
+			p.AccessService(),
+		)
+	}
+
+	return p.accessAPI
 }

@@ -8,7 +8,7 @@ import (
 
 	consts "github.com/MGomed/auth/consts"
 	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
-	db "github.com/MGomed/common/pkg/client/db"
+	db "github.com/MGomed/common/client/db"
 )
 
 // DeleteUser deletes a user in Postgres DB by id

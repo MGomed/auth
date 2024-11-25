@@ -1,4 +1,4 @@
-package auth
+package userapiimpl
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 )
 
 // Get gets user by id
-func (s *UserAPI) Get(ctx context.Context, req *user_api.GetRequest) (*user_api.GetResponse, error) {
+func (api *UserAPI) Get(ctx context.Context, req *user_api.GetRequest) (*user_api.GetResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, consts.ContextTimeout)
 	defer cancel()
 
-	resp, err := s.service.Get(ctx, req.Id)
+	resp, err := api.service.Get(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}

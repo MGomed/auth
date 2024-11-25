@@ -1,4 +1,4 @@
-package auth
+package userapiimpl
 
 import (
 	"context"
@@ -23,7 +23,7 @@ var (
 
 	ctl *gomock.Controller
 
-	mockService *service_mock.MockService
+	mockService *service_mock.MockUserService
 
 	api *UserAPI
 
@@ -35,7 +35,7 @@ func BeforeSuite(t *testing.T) {
 	logger = log.New(io.Discard, "", 0)
 
 	ctl = gomock.NewController(t)
-	mockService = service_mock.NewMockService(ctl)
+	mockService = service_mock.NewMockUserService(ctl)
 
 	api = &UserAPI{logger: logger, service: mockService}
 

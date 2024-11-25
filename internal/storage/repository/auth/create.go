@@ -10,7 +10,7 @@ import (
 	consts "github.com/MGomed/auth/consts"
 	service_model "github.com/MGomed/auth/internal/model"
 	repo_errors "github.com/MGomed/auth/internal/storage/repository/errors"
-	db "github.com/MGomed/common/pkg/client/db"
+	db "github.com/MGomed/common/client/db"
 )
 
 // CreateUser creates a user in Postgres DB

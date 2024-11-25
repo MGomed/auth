@@ -1,6 +1,13 @@
 LOCAL_BIN:=$(CURDIR)/bin
-API_PROTO:=user_api_v1
-API:=user_api
+
+USER_API_PROTO:=user_api_v1
+USER_API:=user_api
+
+AUTH_API_PROTO:=auth_api_v1
+AUTH_API:=auth_api
+
+ACCESS_API_PROTO:=access_api_v1
+ACCESS_API:=access_api
 
 BUILD_DIR:=build
 
@@ -30,7 +37,7 @@ get-deps:
 	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
 generate:
-	make generate-user-api
+	make generate_api
 	make generate_mocks
 	make generate_statik
 
@@ -40,20 +47,55 @@ generate_mocks:
 generate_statik:
 	$(LOCAL_BIN)/pkg/statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
 
-generate-user-api:
-	mkdir -p pkg/$(API)
-	protoc --proto_path api/$(API_PROTO) --proto_path vendor.protogen \
-	--go_out=pkg/$(API) --go_opt=paths=source_relative \
+generate_api:
+	make generate_user_api
+	make generate_auth_api
+	make generate_access_api
+
+generate_user_api:
+	mkdir -p pkg/$(USER_API)
+	protoc --proto_path api/$(USER_API_PROTO) --proto_path vendor.protogen \
+	--go_out=pkg/$(USER_API) --go_opt=paths=source_relative \
 	--plugin=protoc-gen-go=bin/protoc-gen-go \
-	--go-grpc_out=pkg/$(API) --go-grpc_opt=paths=source_relative \
+	--go-grpc_out=pkg/$(USER_API) --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
-	--validate_out lang=go:pkg/$(API) --validate_opt=paths=source_relative \
+	--validate_out lang=go:pkg/$(USER_API) --validate_opt=paths=source_relative \
 	--plugin=protoc-gen-validate=bin/protoc-gen-validate \
-	--grpc-gateway_out=pkg/$(API) --grpc-gateway_opt=paths=source_relative \
+	--grpc-gateway_out=pkg/$(USER_API) --grpc-gateway_opt=paths=source_relative \
 	--plugin=protoc-gen-grpc-gateway=bin/protoc-gen-grpc-gateway \
 	--openapiv2_out=allow_merge=true,merge_file_name=api:pkg/swagger \
 	--plugin=protoc-gen-openapiv2=bin/protoc-gen-openapiv2 \
-	api/$(API_PROTO)/*
+	api/$(USER_API_PROTO)/*
+
+generate_auth_api:
+	mkdir -p pkg/$(AUTH_API)
+	protoc --proto_path api/$(AUTH_API_PROTO) --proto_path vendor.protogen \
+	--go_out=pkg/$(AUTH_API) --go_opt=paths=source_relative \
+	--plugin=protoc-gen-go=bin/protoc-gen-go \
+	--go-grpc_out=pkg/$(AUTH_API) --go-grpc_opt=paths=source_relative \
+	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+	api/$(AUTH_API_PROTO)/*
+
+generate_access_api:
+	mkdir -p pkg/$(ACCESS_API)
+	protoc --proto_path api/$(ACCESS_API_PROTO) --proto_path vendor.protogen \
+	--go_out=pkg/$(ACCESS_API) --go_opt=paths=source_relative \
+	--plugin=protoc-gen-go=bin/protoc-gen-go \
+	--go-grpc_out=pkg/$(ACCESS_API) --go-grpc_opt=paths=source_relative \
+	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+	api/$(ACCESS_API_PROTO)/*
+
+generate_cert:
+	openssl genrsa -out certs/ca.key 4096
+	openssl req -new -x509 -key certs/ca.key -sha256 -config certs/.conf -days 365 -out certs/ca.cert
+	openssl genrsa -out certs/service.key 4096
+	openssl req -new -key certs/service.key -out certs/service.csr -config certs/.conf
+	openssl x509 -req -in certs/service.csr -CA certs/ca.cert -CAkey certs/ca.key -CAcreateserial \
+    		-out certs/service.pem -days 365 -sha256 -extfile certs/.conf -extensions req_ext
+
+generate_secret_keys:
+	openssl rand -out certs/refresh_secret_key -hex 32 
+	openssl rand -out certs/access_secret_key -hex 32 
 
 vendor-proto:
 	@if [ ! -d vendor.protogen/validate ]; then \

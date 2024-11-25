@@ -4,7 +4,7 @@ go 1.22.7
 
 require (
 	github.com/IBM/sarama v1.43.3
-	github.com/MGomed/common v1.0.1
+	github.com/MGomed/common v1.1.0
 	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/golang/mock v1.6.0
@@ -54,6 +54,7 @@ require (
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/georgysavva/scany v1.2.2 // indirect
 	github.com/gomodule/redigo v1.9.2
 	github.com/jackc/pgx/v4 v4.18.3 // indirect
