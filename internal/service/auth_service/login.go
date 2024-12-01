@@ -7,7 +7,7 @@ import (
 	bcrypt "golang.org/x/crypto/bcrypt"
 
 	service_model "github.com/MGomed/auth/internal/model"
-	token "github.com/MGomed/auth/pkg/token"
+	token "github.com/MGomed/common/token"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 

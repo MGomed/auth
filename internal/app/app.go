@@ -21,7 +21,7 @@ import (
 	consts "github.com/MGomed/auth/consts"
 	interceptors "github.com/MGomed/auth/internal/api/interceptors"
 	env_config "github.com/MGomed/auth/internal/config/env"
-	"github.com/MGomed/auth/pkg/access_api"
+	access_api "github.com/MGomed/auth/pkg/access_api"
 	auth_api "github.com/MGomed/auth/pkg/auth_api"
 	user_api "github.com/MGomed/auth/pkg/user_api"
 	closer "github.com/MGomed/common/closer"

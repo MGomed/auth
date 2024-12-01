@@ -3,7 +3,7 @@ package accessapiimpl
 import (
 	"log"
 
-	"github.com/MGomed/auth/internal/service"
+	service "github.com/MGomed/auth/internal/service"
 	access_api "github.com/MGomed/auth/pkg/access_api"
 )
 
