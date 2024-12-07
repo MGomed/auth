@@ -40,3 +40,9 @@ type KafkaConfig interface {
 	GroupID() string
 	Config() *sarama.Config
 }
+
+// JWTConfig is jwt config interface
+type JWTConfig interface {
+	GetRefreshTokenExpirationTimeMin() time.Duration
+	GetAccessTokenExpirationTimeMin() time.Duration
+}

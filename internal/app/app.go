@@ -10,23 +10,24 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/IBM/sarama"
 	runtime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	fs "github.com/rakyll/statik/fs"
 	cors "github.com/rs/cors"
 	grpc "google.golang.org/grpc"
+	credentials "google.golang.org/grpc/credentials"
 	insecure "google.golang.org/grpc/credentials/insecure"
 	reflection "google.golang.org/grpc/reflection"
 
 	consts "github.com/MGomed/auth/consts"
 	interceptors "github.com/MGomed/auth/internal/api/interceptors"
 	env_config "github.com/MGomed/auth/internal/config/env"
-	kafka_consumer "github.com/MGomed/auth/pkg/kafka/consumer"
+	access_api "github.com/MGomed/auth/pkg/access_api"
+	auth_api "github.com/MGomed/auth/pkg/auth_api"
 	user_api "github.com/MGomed/auth/pkg/user_api"
+	closer "github.com/MGomed/common/closer"
 
 	// Needed to get static files
 	_ "github.com/MGomed/auth/pkg/statik"
-	closer "github.com/MGomed/common/pkg/closer"
 )
 
 var configPath string
@@ -94,49 +95,49 @@ func (a *App) Run() error {
 		}
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
 
-		consumerCreate := a.serviceProvider.Consumer()
-		closer.Add(consumerCreate.Close)
+	// 	consumerCreate := a.serviceProvider.Consumer()
+	// 	closer.Add(consumerCreate.Close)
 
-		err := consumerCreate.Consume(a.ctx, consts.CreateTopic, kafka_consumer.Handler(
-			func(_ context.Context, msg *sarama.ConsumerMessage) error {
-				logger := a.serviceProvider.Logger()
+	// 	err := consumerCreate.Consume(a.ctx, consts.CreateTopic, kafka_consumer.Handler(
+	// 		func(_ context.Context, msg *sarama.ConsumerMessage) error {
+	// 			logger := a.serviceProvider.Logger()
 
-				logger.Printf("MESSAGE FROM KAFKA: >>> User created:\n%v\n", msg.Value)
+	// 			logger.Printf("MESSAGE FROM KAFKA: >>> User created:\n%v\n", msg.Value)
 
-				return nil
-			}),
-		)
+	// 			return nil
+	// 		}),
+	// 	)
 
-		if err != nil {
-			a.serviceProvider.Logger().Println("consumer error: ", err)
-		}
-	}()
+	// 	if err != nil {
+	// 		a.serviceProvider.Logger().Println("consumer error: ", err)
+	// 	}
+	// }()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
 
-		consumerDelete := a.serviceProvider.Consumer()
-		closer.Add(consumerDelete.Close)
+	// 	consumerDelete := a.serviceProvider.Consumer()
+	// 	closer.Add(consumerDelete.Close)
 
-		err := consumerDelete.Consume(a.ctx, consts.DeleteTopic, kafka_consumer.Handler(
-			func(_ context.Context, msg *sarama.ConsumerMessage) error {
-				logger := a.serviceProvider.Logger()
+	// 	err := consumerDelete.Consume(a.ctx, consts.DeleteTopic, kafka_consumer.Handler(
+	// 		func(_ context.Context, msg *sarama.ConsumerMessage) error {
+	// 			logger := a.serviceProvider.Logger()
 
-				logger.Printf("MESSAGE FROM KAFKA: >>> User deleted:\n%v\n", msg.Value)
+	// 			logger.Printf("MESSAGE FROM KAFKA: >>> User deleted:\n%v\n", msg.Value)
 
-				return nil
-			}),
-		)
+	// 			return nil
+	// 		}),
+	// 	)
 
-		if err != nil {
-			a.serviceProvider.Logger().Println("consumer error: ", err)
-		}
-	}()
+	// 	if err != nil {
+	// 		a.serviceProvider.Logger().Println("consumer error: ", err)
+	// 	}
+	// }()
 
 	wg.Wait()
 
@@ -176,14 +177,21 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initGRPCServer(ctx context.Context) error {
+	creds, err := credentials.NewServerTLSFromFile(consts.ServiceCertFilePath, consts.ServiceCertKeyFilePath)
+	if err != nil {
+		return err
+	}
+
 	a.grpcServer = grpc.NewServer(
-		grpc.Creds(insecure.NewCredentials()),
+		grpc.Creds(creds),
 		grpc.UnaryInterceptor(interceptors.ValidateInterceptor),
 	)
 
 	reflection.Register(a.grpcServer)
 
 	user_api.RegisterUserAPIServer(a.grpcServer, a.serviceProvider.UserAPI(ctx))
+	auth_api.RegisterAuthAPIServer(a.grpcServer, a.serviceProvider.AuthAPI(ctx))
+	access_api.RegisterAccessAPIServer(a.grpcServer, a.serviceProvider.AccessAPI())
 
 	return nil
 }

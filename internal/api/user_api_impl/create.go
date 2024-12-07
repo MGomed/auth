@@ -1,4 +1,4 @@
-package auth
+package userapiimpl
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 )
 
 // Create creates new user
-func (s *UserAPI) Create(ctx context.Context, req *user_api.CreateRequest) (*user_api.CreateResponse, error) {
+func (api *UserAPI) Create(ctx context.Context, req *user_api.CreateRequest) (*user_api.CreateResponse, error) {
 	ctx, cancel := context.WithTimeout(ctx, consts.ContextTimeout)
 	defer cancel()
 
@@ -18,7 +18,7 @@ func (s *UserAPI) Create(ctx context.Context, req *user_api.CreateRequest) (*use
 		return nil, errors.ErrPasswordMismatch
 	}
 
-	id, err := s.service.Create(ctx, converters.ToUserCreateFromAPI(req.User))
+	id, err := api.service.Create(ctx, converters.ToUserCreateFromAPI(req.User))
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,15 @@ package consts
 
 import "time"
 
+// ServiceName is a application name
+const ServiceName = "auth_service"
+
+// Security files path
+const (
+	ServiceCertFilePath    = "certs/service.pem"
+	ServiceCertKeyFilePath = "certs/service.key"
+)
+
 // Timeouts uses in project
 const (
 	ContextTimeout    = 30 * time.Second
@@ -44,6 +53,12 @@ const (
 	RedisIdleTimeoutSecEnv       = "REDIS_IDLE_TIMEOUT_SEC"
 )
 
+// JWT env's names
+const (
+	JWTRefreshTokenExpirationTimeMinEnv = "REFRESH_TOKEN_EXPIRATION_MIN" //nolint:gosec
+	JWTAccessTokenExpirationTimeMinEnv  = "ACCESS_TOKEN_EXPIRATION_MIN"  //nolint:gosec
+)
+
 // DB table and columns names
 const (
 	AuthTable = "auth"
@@ -77,4 +92,20 @@ const (
 const (
 	KafkaBrokersEnvName = "KAFKA_BROKERS"
 	KafkaGroupIDEnvName = "KAFKA_GROUP_ID"
+)
+
+// AccessibleMap defines access to different route for user roles
+var AccessibleMap = map[string][]string{
+	"/chat_service/CreateChat":    {RoleAdmin},
+	"/chat_service/ConnectToChat": {RoleAdmin, RoleUser},
+	"/chat_service/SendMessage":   {RoleAdmin, RoleUser},
+}
+
+// AccessPrefix defines access prefix in grpc context
+var AccessPrefix = "Bearer "
+
+// Secret key paths
+const (
+	RefreshSecretKeyPath = "certs/refresh_secret_key" //nolint:gosec
+	AccessSecretKeyPath  = "certs/access_secret_key"  //nolint:gosec
 )

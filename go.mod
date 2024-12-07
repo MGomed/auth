@@ -4,7 +4,7 @@ go 1.22.7
 
 require (
 	github.com/IBM/sarama v1.43.3
-	github.com/MGomed/common v1.0.1
+	github.com/MGomed/common v1.2.1
 	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/golang/mock v1.6.0
@@ -16,7 +16,7 @@ require (
 	golang.org/x/crypto v0.29.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241104194629-dd2ea8efbc28
 	google.golang.org/grpc v1.68.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
@@ -54,6 +54,7 @@ require (
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/georgysavva/scany v1.2.2 // indirect
 	github.com/gomodule/redigo v1.9.2
 	github.com/jackc/pgx/v4 v4.18.3 // indirect

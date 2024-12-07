@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package access_api;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/MGomed/auth/pkg/access_api;access_api";
+
+service AccessAPI {
+    rpc Check(CheckRequest) returns (google.protobuf.Empty);
+}
+
+message CheckRequest {
+    string endpoint_address = 1;
+}

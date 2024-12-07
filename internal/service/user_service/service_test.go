@@ -1,4 +1,4 @@
-package auth
+package userservice
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	service_model "github.com/MGomed/auth/internal/model"
 	cache_errors "github.com/MGomed/auth/internal/storage/cache/errors"
 	storage_mock "github.com/MGomed/auth/internal/storage/mocks"
-	db_mock "github.com/MGomed/common/pkg/client/db/mocks"
+	db_mock "github.com/MGomed/common/client/db/mocks"
 )
 
 var (

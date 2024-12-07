@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MGomed/auth/consts"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // RoleNames maps api.Role to its string representation
@@ -36,4 +37,12 @@ type UserInfo struct {
 type UserUpdate struct {
 	Name *string
 	Role *string
+}
+
+// UserClaims is jwt.Claims for auth service
+type UserClaims struct {
+	jwt.StandardClaims
+
+	Email string `json:"email"`
+	Role  string `json:"role"`
 }

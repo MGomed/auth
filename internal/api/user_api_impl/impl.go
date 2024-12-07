@@ -1,4 +1,4 @@
-package auth
+package userapiimpl
 
 import (
 	"log"
@@ -12,11 +12,11 @@ type UserAPI struct {
 	user_api.UnimplementedUserAPIServer
 
 	logger  *log.Logger
-	service service.Service
+	service service.UserService
 }
 
 // NewUserAPI is api struct constructor
-func NewUserAPI(logger *log.Logger, service service.Service) *UserAPI {
+func NewUserAPI(logger *log.Logger, service service.UserService) *UserAPI {
 	return &UserAPI{
 		logger:  logger,
 		service: service,

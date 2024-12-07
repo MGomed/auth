@@ -1,4 +1,4 @@
-package auth
+package userapiimpl
 
 import (
 	"context"
@@ -6,16 +6,15 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 
 	consts "github.com/MGomed/auth/consts"
-	converters "github.com/MGomed/auth/internal/converters"
 	user_api "github.com/MGomed/auth/pkg/user_api"
 )
 
-// Update modifies user information
-func (s *UserAPI) Update(ctx context.Context, req *user_api.UpdateRequest) (*empty.Empty, error) {
+// Delete removes user by id
+func (api *UserAPI) Delete(ctx context.Context, req *user_api.DeleteRequest) (*empty.Empty, error) {
 	ctx, cancel := context.WithTimeout(ctx, consts.ContextTimeout)
 	defer cancel()
 
-	err := s.service.Update(ctx, req.Id, converters.ToUserUpdateFromAPI(req.User))
+	err := api.service.Delete(ctx, req.Id)
 	if err != nil {
 		return nil, err
 	}

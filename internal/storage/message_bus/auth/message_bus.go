@@ -5,7 +5,7 @@ import (
 
 	msg_bus_errors "github.com/MGomed/auth/internal/storage/message_bus/errors"
 	msg_bus_model "github.com/MGomed/auth/internal/storage/message_bus/model"
-	kafka "github.com/MGomed/auth/pkg/kafka"
+	kafka "github.com/MGomed/common/kafka"
 )
 
 type messageBus struct {
@@ -21,6 +21,10 @@ func NewMessageBus(producer kafka.Producer) *messageBus {
 
 // SendMessage sending messagee to topic
 func (b *messageBus) SendMessage(ctx context.Context, msg *msg_bus_model.Message) error {
+	if msg == nil {
+		return nil
+	}
+
 	topic, ok := msg_bus_model.MessageTypeToTopic[msg.Type]
 	if !ok {
 		return msg_bus_errors.ErrUnrecognized
