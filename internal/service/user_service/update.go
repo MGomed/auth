@@ -14,7 +14,7 @@ func (s *service) Update(ctx context.Context, id int64, user *service_model.User
 		var errTx error
 		_, errTx = s.repo.UpdateUser(ctx, id, user)
 		if errTx != nil {
-			s.logger.Printf("Failed to add user in database: %v", errTx)
+			s.logger.Error("Failed to add user in database: %v", errTx)
 
 			return errTx
 		}
@@ -23,8 +23,6 @@ func (s *service) Update(ctx context.Context, id int64, user *service_model.User
 		if errTx != nil {
 			return errTx
 		}
-
-		s.logger.Printf("Successfully added user with id: %v", id)
 
 		return nil
 	})
@@ -36,7 +34,7 @@ func (s *service) Update(ctx context.Context, id int64, user *service_model.User
 		return err
 	}
 
-	s.logger.Printf("Successfully updated user with id: %v", id)
+	s.logger.Debug("Successfully updated user with id: %v", id)
 
 	return nil
 }

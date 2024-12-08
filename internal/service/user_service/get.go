@@ -19,12 +19,12 @@ func (s *service) Get(ctx context.Context, id int64) (*service_model.UserInfo, e
 
 	user, err = s.repo.GetUser(ctx, id)
 	if err != nil {
-		s.logger.Printf("Failed to get user with id - %v from database: %v", id, err)
+		s.logger.Error("Failed to get user with id - %v from database: %v", id, err)
 
 		return nil, err
 	}
 
-	s.logger.Printf("Successfully got user!")
+	s.logger.Debug("Successfully got user!")
 
 	return user, nil
 }

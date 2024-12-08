@@ -19,7 +19,12 @@ type UserService interface {
 
 // AuthService interface of auth_api usecase
 type AuthService interface {
-	Login(ctx context.Context, email, password string, secretKey []byte, duration time.Duration) (string, error)
+	Login(
+		ctx context.Context,
+		email, password string,
+		refreshSecretKey, accessSecretKey []byte,
+		refreshExpTime, accessExpTime time.Duration,
+	) (string, string, error)
 	GetRefreshToken(refreshToken string, secretKey []byte, duration time.Duration) (string, error)
 	GetAccessToken(refreshToken string, refreshSecretKey, accessSecretKey []byte, duration time.Duration) (string, error)
 }

@@ -32,10 +32,6 @@ install-deps:
 	[ -f $(LOCAL_BIN)/protoc-gen-openapiv2 ] || GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.20.0
 	[ -f $(LOCAL_BIN)/statik ] || GOBIN=$(LOCAL_BIN) go install github.com/rakyll/statik@v0.1.7
 
-get-deps:
-	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/protobuf/cmd/protoc-gen-go
-	GOBIN=$(LOCAL_BIN) go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
-
 generate:
 	make generate_api
 	make generate_mocks
@@ -45,7 +41,7 @@ generate_mocks:
 	./generate.sh
 
 generate_statik:
-	$(LOCAL_BIN)/pkg/statik -src=pkg/swagger/ -include='*.css,*.html,*.js,*.json,*.png'
+	$(LOCAL_BIN)/statik -src=pkg/swagger/ -dest=pkg/ -include='*.css,*.html,*.js,*.json,*.png'
 
 generate_api:
 	make generate_user_api
