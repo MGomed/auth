@@ -40,13 +40,14 @@ type serviceProvider struct {
 
 	logger logger.Interface
 
-	pgConfig      config.PgConfig
-	redisConfig   config.RedisConfig
-	grpcConfig    config.GRPCConfig
-	httpConfig    config.HTTPConfig
-	swaggerConfig config.SwaggerConfig
-	kafkaConfig   config.KafkaConfig
-	jwtConfig     config.JWTConfig
+	pgConfig         config.PgConfig
+	redisConfig      config.RedisConfig
+	grpcConfig       config.GRPCConfig
+	httpConfig       config.HTTPConfig
+	swaggerConfig    config.SwaggerConfig
+	prometheusConfig config.PrometheusConfig
+	kafkaConfig      config.KafkaConfig
+	jwtConfig        config.JWTConfig
 
 	dbc         db.Client
 	redisClient cache.RedisClient
@@ -166,6 +167,20 @@ func (p *serviceProvider) SwaggerConfig() config.SwaggerConfig {
 	}
 
 	return p.swaggerConfig
+}
+
+// SwaggerConfig init/get swagger config
+func (p *serviceProvider) PrometheusConfig() config.PrometheusConfig {
+	if p.prometheusConfig == nil {
+		cfg, err := env_config.NewPrometheusConfig()
+		if err != nil {
+			log.Fatalf("failed to create prometheus config: %v", err)
+		}
+
+		p.prometheusConfig = cfg
+	}
+
+	return p.prometheusConfig
 }
 
 // KafkaConfig init/get kafka config

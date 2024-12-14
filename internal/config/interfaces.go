@@ -21,6 +21,11 @@ type SwaggerConfig interface {
 	Address() string
 }
 
+// PrometheusConfig is http config interface
+type PrometheusConfig interface {
+	Address() string
+}
+
 // PgConfig is postgres config interface
 type PgConfig interface {
 	DSN() string

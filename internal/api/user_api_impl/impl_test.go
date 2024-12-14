@@ -3,7 +3,6 @@ package userapiimpl
 import (
 	"context"
 	"errors"
-	"log"
 	"testing"
 
 	gomock "github.com/golang/mock/gomock"
@@ -17,11 +16,9 @@ import (
 )
 
 var (
-	ctx    context.Context
-	logger *log.Logger
+	ctx context.Context
 
-	ctl *gomock.Controller
-
+	ctl         *gomock.Controller
 	mockService *service_mock.MockUserService
 
 	api *UserAPI
