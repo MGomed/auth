@@ -18,7 +18,7 @@ func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (i
 		var errTx error
 		id, errTx = s.repo.CreateUser(ctx, user)
 		if errTx != nil {
-			s.logger.Printf("Failed to add user in database: %v", errTx)
+			s.logger.Error("Failed to add user in database: %v", errTx)
 
 			return errTx
 		}
@@ -28,7 +28,7 @@ func (s *service) Create(ctx context.Context, user *service_model.UserCreate) (i
 			return errTx
 		}
 
-		s.logger.Printf("Successfully added user with id: %v", id)
+		s.logger.Debug("Successfully added user with id: %v", id)
 
 		return nil
 	})

@@ -12,7 +12,7 @@ import (
 func (s *service) Delete(ctx context.Context, id int64) error {
 	_, err := s.repo.DeleteUser(ctx, id)
 	if err != nil {
-		s.logger.Printf("Failed to delete user with id - %v from database: %v", id, err)
+		s.logger.Error("Failed to delete user with id - %v from database: %v", id, err)
 
 		return err
 	}
@@ -23,7 +23,7 @@ func (s *service) Delete(ctx context.Context, id int64) error {
 		}
 	}
 
-	s.logger.Printf("Successfully deleted user: %v", id)
+	s.logger.Debug("Successfully deleted user: %v", id)
 
 	msg, err := msg_bus_converters.ToMessageTypeFromID(id)
 	if err != nil {

@@ -35,6 +35,12 @@ const (
 	SwaggerServerPortEnv = "SWAGGER_PORT"
 )
 
+// Prometheus Server env's names
+const (
+	PrometheusServerHostEnv = "PROMETHEUS_HOST"
+	PrometheusServerPortEnv = "PROMETHEUS_PORT"
+)
+
 // DB env's names
 const (
 	DBHostEnv     = "DB_HOST"
@@ -108,4 +114,16 @@ var AccessPrefix = "Bearer "
 const (
 	RefreshSecretKeyPath = "certs/refresh_secret_key" //nolint:gosec
 	AccessSecretKeyPath  = "certs/access_secret_key"  //nolint:gosec
+)
+
+// Metric's consts
+const (
+	MetricsNamespace = "auth_namespace"
+	MetricsAppName   = "auth"
+)
+
+// Metric's labels const
+const (
+	MetricStatusLabel = "status"
+	MetricMethodLabel = "method"
 )

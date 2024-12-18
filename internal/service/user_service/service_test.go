@@ -3,8 +3,6 @@ package userservice
 import (
 	"context"
 	"errors"
-	"io"
-	"log"
 	"testing"
 
 	gomock "github.com/golang/mock/gomock"
@@ -14,11 +12,11 @@ import (
 	cache_errors "github.com/MGomed/auth/internal/storage/cache/errors"
 	storage_mock "github.com/MGomed/auth/internal/storage/mocks"
 	db_mock "github.com/MGomed/common/client/db/mocks"
+	logger "github.com/MGomed/common/logger"
 )
 
 var (
-	ctx    context.Context
-	logger *log.Logger
+	ctx context.Context
 
 	ctl *gomock.Controller
 
@@ -34,7 +32,6 @@ var (
 
 func BeforeSuite(t *testing.T) {
 	ctx = context.Background()
-	logger = log.New(io.Discard, "", 0)
 
 	ctl = gomock.NewController(t)
 	mockRepo = storage_mock.NewMockRepository(ctl)
@@ -43,7 +40,7 @@ func BeforeSuite(t *testing.T) {
 	mockMsgBus = storage_mock.NewMockMessageBus(ctl)
 
 	serv = &service{
-		logger:    logger,
+		logger:    &logger.TestLogger{},
 		repo:      mockRepo,
 		cache:     mockCache,
 		txManager: mockTxMnager,

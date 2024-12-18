@@ -1,14 +1,13 @@
 package userservice
 
 import (
-	"log"
-
 	storage "github.com/MGomed/auth/internal/storage"
 	db "github.com/MGomed/common/client/db"
+	logger "github.com/MGomed/common/logger"
 )
 
 type service struct {
-	logger    *log.Logger
+	logger    logger.Interface
 	repo      storage.Repository
 	cache     storage.Cache
 	txManager db.TxManager
@@ -17,7 +16,7 @@ type service struct {
 
 // NewUserService is a service constructor
 func NewUserService(
-	logger *log.Logger,
+	logger logger.Interface,
 	repo storage.Repository,
 	cache storage.Cache,
 	txManager db.TxManager,

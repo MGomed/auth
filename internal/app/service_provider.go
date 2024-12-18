@@ -38,15 +38,16 @@ type serviceProvider struct {
 	refreshSecretKey []byte
 	accessSecretKey  []byte
 
-	logger *log.Logger
+	logger logger.Interface
 
-	pgConfig      config.PgConfig
-	redisConfig   config.RedisConfig
-	grpcConfig    config.GRPCConfig
-	httpConfig    config.HTTPConfig
-	swaggerConfig config.SwaggerConfig
-	kafkaConfig   config.KafkaConfig
-	jwtConfig     config.JWTConfig
+	pgConfig         config.PgConfig
+	redisConfig      config.RedisConfig
+	grpcConfig       config.GRPCConfig
+	httpConfig       config.HTTPConfig
+	swaggerConfig    config.SwaggerConfig
+	prometheusConfig config.PrometheusConfig
+	kafkaConfig      config.KafkaConfig
+	jwtConfig        config.JWTConfig
 
 	dbc         db.Client
 	redisClient cache.RedisClient
@@ -168,6 +169,20 @@ func (p *serviceProvider) SwaggerConfig() config.SwaggerConfig {
 	return p.swaggerConfig
 }
 
+// SwaggerConfig init/get swagger config
+func (p *serviceProvider) PrometheusConfig() config.PrometheusConfig {
+	if p.prometheusConfig == nil {
+		cfg, err := env_config.NewPrometheusConfig()
+		if err != nil {
+			log.Fatalf("failed to create prometheus config: %v", err)
+		}
+
+		p.prometheusConfig = cfg
+	}
+
+	return p.prometheusConfig
+}
+
 // KafkaConfig init/get kafka config
 func (p *serviceProvider) KafkaConfig() config.KafkaConfig {
 	if p.kafkaConfig == nil {
@@ -197,9 +212,14 @@ func (p *serviceProvider) JWTConfig() config.JWTConfig {
 }
 
 // Logger init/get logger
-func (p *serviceProvider) Logger() *log.Logger {
+func (p *serviceProvider) Logger() logger.Interface {
 	if p.logger == nil {
-		p.logger = logger.InitLogger(consts.ServiceName)
+		logger.SetLogLevel("DEBUG")
+		logger.SetOutput("CONSOLE")
+		logger.SetStackTraceKey("stask")
+		logger.SetTimeKey("ts")
+
+		p.logger = logger.NewLogger(consts.ServiceName)
 	}
 
 	return p.logger
@@ -217,6 +237,8 @@ func (p *serviceProvider) DBClient(ctx context.Context) db.Client {
 			log.Fatalf("ping error: %v", err)
 		}
 		closer.Add(dbc.Close)
+
+		p.Logger().Debug("Successfully connected to Postgres!")
 
 		p.dbc = dbc
 	}
@@ -242,6 +264,8 @@ func (p *serviceProvider) RedisClient(ctx context.Context) cache.RedisClient {
 		}
 		closer.Add(pool.Close)
 
+		p.Logger().Debug("Successfully connected to Redis!")
+
 		p.redisClient = client
 	}
 
@@ -257,6 +281,8 @@ func (p *serviceProvider) Producer(_ context.Context) kafka.Producer {
 		}
 
 		p.producer = producer
+
+		p.Logger().Debug("Successfully added producer for Kafka!")
 
 		closer.Add(p.producer.Close)
 	}
@@ -355,7 +381,7 @@ func (p *serviceProvider) AccessService() service.AccessService {
 // UserAPI init/get UserAPI(grpc implementation)
 func (p *serviceProvider) UserAPI(ctx context.Context) *user_api_impl.UserAPI {
 	if p.userAPI == nil {
-		p.userAPI = user_api_impl.NewUserAPI(p.Logger(), p.UserService(ctx))
+		p.userAPI = user_api_impl.NewUserAPI(p.UserService(ctx))
 	}
 
 	return p.userAPI
@@ -365,7 +391,6 @@ func (p *serviceProvider) UserAPI(ctx context.Context) *user_api_impl.UserAPI {
 func (p *serviceProvider) AuthAPI(ctx context.Context) *auth_api_impl.AuthAPI {
 	if p.authAPI == nil {
 		p.authAPI = auth_api_impl.NewAuthAPI(
-			p.Logger(),
 			p.JWTConfig().GetRefreshTokenExpirationTimeMin(),
 			p.JWTConfig().GetAccessTokenExpirationTimeMin(),
 			p.RefreshSecretKey(),
@@ -381,7 +406,6 @@ func (p *serviceProvider) AuthAPI(ctx context.Context) *auth_api_impl.AuthAPI {
 func (p *serviceProvider) AccessAPI() *access_api_impl.AccessAPI {
 	if p.accessAPI == nil {
 		p.accessAPI = access_api_impl.NewAccessAPI(
-			p.Logger(),
 			p.AccessSecretKey(),
 			p.AccessService(),
 		)

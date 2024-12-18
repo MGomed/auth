@@ -19,6 +19,7 @@ message LoginRequest {
 
 message LoginResponse {
     string refresh_token = 1;
+    string access_token  = 2;
 }
 
 message GetRefreshTokenRequest {

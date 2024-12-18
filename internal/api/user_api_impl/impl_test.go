@@ -3,8 +3,6 @@ package userapiimpl
 import (
 	"context"
 	"errors"
-	"io"
-	"log"
 	"testing"
 
 	gomock "github.com/golang/mock/gomock"
@@ -18,11 +16,9 @@ import (
 )
 
 var (
-	ctx    context.Context
-	logger *log.Logger
+	ctx context.Context
 
-	ctl *gomock.Controller
-
+	ctl         *gomock.Controller
 	mockService *service_mock.MockUserService
 
 	api *UserAPI
@@ -32,12 +28,11 @@ var (
 
 func BeforeSuite(t *testing.T) {
 	ctx = context.Background()
-	logger = log.New(io.Discard, "", 0)
 
 	ctl = gomock.NewController(t)
 	mockService = service_mock.NewMockUserService(ctl)
 
-	api = &UserAPI{logger: logger, service: mockService}
+	api = &UserAPI{service: mockService}
 
 	t.Cleanup(ctl.Finish)
 }
