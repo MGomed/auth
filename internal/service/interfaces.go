@@ -24,7 +24,7 @@ type AuthService interface {
 		email, password string,
 		refreshSecretKey, accessSecretKey []byte,
 		refreshExpTime, accessExpTime time.Duration,
-	) (string, string, error)
+	) (*service_model.Tokens, error)
 	GetRefreshToken(refreshToken string, secretKey []byte, duration time.Duration) (string, error)
 	GetAccessToken(refreshToken string, refreshSecretKey, accessSecretKey []byte, duration time.Duration) (string, error)
 }

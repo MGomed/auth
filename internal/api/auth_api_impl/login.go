@@ -8,7 +8,7 @@ import (
 
 // Login logs in user
 func (api *AuthAPI) Login(ctx context.Context, req *auth_api.LoginRequest) (*auth_api.LoginResponse, error) {
-	refreshToken, accessToken, err := api.service.Login(
+	tokens, err := api.service.Login(
 		ctx, req.Email, req.Password,
 		api.refreshSecretKey, api.accessSecretKey,
 		api.refreshTokenExpiration, api.accessTokenExpiration,
@@ -18,7 +18,7 @@ func (api *AuthAPI) Login(ctx context.Context, req *auth_api.LoginRequest) (*aut
 	}
 
 	return &auth_api.LoginResponse{
-		RefreshToken: refreshToken,
-		AccessToken:  accessToken,
+		RefreshToken: tokens.RefreshToken,
+		AccessToken:  tokens.AccessToken,
 	}, nil
 }

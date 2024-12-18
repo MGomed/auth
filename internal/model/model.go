@@ -46,3 +46,9 @@ type UserClaims struct {
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
+
+// Tokens declare struct with refresh and access tokens
+type Tokens struct {
+	RefreshToken string
+	AccessToken  string
+}

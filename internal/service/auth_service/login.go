@@ -17,18 +17,18 @@ func (s *service) Login(
 	email, password string,
 	refreshSecretKey, accessSecretKey []byte,
 	refreshExpTime, accessExpTime time.Duration,
-) (string, string, error) {
+) (*service_model.Tokens, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		s.log.Error("Failed to get user by email: %v", err)
 
-		return "", "", err
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(password)); err != nil {
 		s.log.Error("Failed user password matching!")
 
-		return "", "", err
+		return nil, err
 	}
 
 	refreshToken, err := token.GenerateToken(service_model.UserClaims{
@@ -41,7 +41,7 @@ func (s *service) Login(
 	if err != nil {
 		s.log.Error("Failed to generate refresh token: %v", err)
 
-		return "", "", err
+		return nil, err
 	}
 
 	accessToken, err := token.GenerateToken(service_model.UserClaims{
@@ -54,10 +54,13 @@ func (s *service) Login(
 	if err != nil {
 		s.log.Error("Failed to generate access token: %v", err)
 
-		return "", "", err
+		return nil, err
 	}
 
 	s.log.Debug("Successfully generate refresh (%v) and access (%v) tokens", refreshToken, accessToken)
 
-	return refreshToken, accessToken, nil
+	return &service_model.Tokens{
+		RefreshToken: refreshToken,
+		AccessToken:  accessToken,
+	}, nil
 }
